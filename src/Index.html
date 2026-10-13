@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <title><?= siteTitle ?></title>
+  <meta name="description" content="<?= siteDescription ?>">
+  <meta property="og:title" content="<?= siteTitle ?>">
+  <meta property="og:description" content="<?= siteDescription ?>">
+  <meta property="og:type" content="profile">
+  <meta name="theme-color" content="#14110f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <?!= include('Styles') ?>
+</head>
+<body class="<?= preview ? 'is-preview' : '' ?>">
+  <a class="skip" href="#story">Skip to the story</a>
+
+  <? if (preview) { ?>
+  <div class="preview-bar" role="status">PREVIEW MODE — highlighted fields are placeholders waiting for Victor’s content. Visitors never see them.</div>
+  <? } ?>
+
+  <!-- ===================== NAVIGATION ===================== -->
+  <header class="nav" id="top">
+    <a class="brand" href="#home" aria-label="Victor Uringtho — home">
+      <span class="brand-mark" aria-hidden="true">VU</span>
+      <span class="brand-name">Victor Uringtho</span>
+    </a>
+    <nav aria-label="Main">
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#story">Story</a></li>
+        <li><a href="#music">Music</a></li>
+        <li><a href="#artists">Artists</a></li>
+        <li><a href="#bands">Bands</a></li>
+        <li><a href="#craft">Work</a></li>
+        <li><a href="#events">Events</a></li>
+        <li><a href="#milestones">Milestones</a></li>
+        <li><a href="#next">New Chapter</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-tools">
+      <button class="icon-btn" id="searchOpen" aria-label="Search the portfolio (press /)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      </button>
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="nav-progress" id="navProgress" aria-hidden="true"></div>
+  </header>
+
+  <main>
+    <!-- ===================== HERO ===================== -->
+    <section class="hero" id="home" aria-labelledby="heroName">
+      <div class="hero-photo" id="heroPhoto" role="img" aria-label="Portrait of Victor Uringtho"></div>
+      <div class="hero-grain" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <p class="eyebrow reveal" id="heroMeaning">Unyuthfua · “Show us our home”</p>
+        <h1 id="heroName" class="hero-name">
+          <span class="line"><span>Victor</span></span>
+          <span class="line"><span>Uringtho</span></span>
+        </h1>
+        <p class="hero-roles reveal" id="heroRoles"></p>
+        <p class="hero-statement reveal" id="heroStatement"></p>
+        <div class="hero-cta reveal">
+          <a class="btn btn-primary" href="#story">Explore the Journey</a>
+          <a class="btn btn-ghost" href="#music">Listen to the Music</a>
+          <a class="btn btn-text" href="#craft">View the Work →</a>
+        </div>
+      </div>
+      <!-- Six strings — the guitar he built from wood, a pan and clutch wire -->
+      <svg class="strings" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 10 Q600 10 1200 10"/><path d="M0 30 Q600 30 1200 30"/><path d="M0 50 Q600 50 1200 50"/>
+        <path d="M0 70 Q600 70 1200 70"/><path d="M0 90 Q600 90 1200 90"/><path d="M0 110 Q600 110 1200 110"/>
+      </svg>
+    </section>
+
+    <!-- ===================== NUMBERS ===================== -->
+    <section class="stats" aria-label="Victor in numbers">
+      <div class="wrap stats-grid" id="stats"></div>
+    </section>
+
+    <!-- ===================== STORY ===================== -->
+    <section class="section" id="story" aria-labelledby="storyTitle">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">TRK 01 · The Story</p>
+          <h2 id="storyTitle">A Journey of Faith, Passion and Music</h2>
+          <p class="lede">Each chapter is marked with a chord Victor learned — in the order he learned them.</p>
+        </header>
+        <div class="chapters" id="chapters"></div>
+      </div>
+    </section>
+
+    <!-- ===================== PEOPLE ===================== -->
+    <section class="section section-alt" id="people" aria-labelledby="peopleTitle">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">The people who shaped him</p>
+          <h2 id="peopleTitle">No one learns alone</h2>
+        </header>
+        <div class="people" id="peopleList"></div>
+      </div>
+    </section>
+
+    <!-- ===================== MUSIC ===================== -->
+    <section class="section" id="music" aria-labelledby="musicTitle">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">TRK 02 · Music Archive</p>
+          <h2 id="musicTitle">Listen</h2>
+          <p class="lede">Albums, productions and recordings — each labelled with what Victor did.</p>
+        </header>
+        <div class="filters" id="musicFilters" role="toolbar" aria-label="Filter music"></div>
+        <div class="music-grid" id="musicGrid"></div>
+      </div>
+    </section>
+
+    <!-- ===================== ARTISTS ===================== -->
+    <section class="section section-alt" id="artists" aria-labelledby="artistsTitle">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">TRK 03 · Collaborations</p>
+          <h2 id="artistsTitle">Artists &amp; groups he has worked with</h2>
+          <p class="lede">In the studio and on stage — in Uganda and, through remote mixing and mastering, beyond.</p>
+        </header>
+        <div class="filters" id="artistFilters" role="toolbar" aria-label="Filter artists"></div>
+        <div class="artist-grid" id="artistGrid"></div>
+      </div>
+    </section>
+
+    <!-- ===================== BANDS ===================== -->
+    <section class="section" id="bands" aria-labelledby="bandsTitle">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">TRK 04 · The Bands</p>
+          <h2 id="bandsTitle">On the stage, behind the desk</h2>
+        </header>
+        <div id="bandCurrent"></div>
+        <div class="band-list" id="bandList"></div>
+      </div>
+    </section>
+
+    <!-- ===================== CRAFT / WORK ===================== -->
+    <section class="section section-alt" id="craft" aria-labelledby="craftTitle">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">TRK 05 · Skills &amp; Craft</p>
+          <h2 id="craftTitle">The craft, and where it came from</h2>
+          <p class="lede">Every skill here is tied to the moment Victor earned it.</p>
+        </header>
+        <div class="console" id="skills"></div>
+        <h3 class="sub-head">Work with Victor</h3>
+        <div class="services" id="services"></div>
+      </div>
+    </section>
+
+    <!-- ===================== EVENTS ===================== -->
+    <section class="section" id="events" aria-labelledby="eventsTitle">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">TRK 06 · Events &amp; Moments</p>
+          <h2 id="eventsTitle">Where the music happened</h2>
+        </header>
+        <div class="event-list" id="eventList"></div>
+        <div class="filters" id="photoFilters" role="toolbar" aria-label="Filter photographs"></div>
+        <div class="masonry" id="gallery"></div>
+      </div>
+    </section>
+
+    <!-- ===================== MILESTONES ===================== -->
+    <section class="section section-alt" id="milestones" aria-labelledby="msTitle">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">TRK 07 · Milestones</p>
+          <h2 id="msTitle">The journey so far</h2>
+        </header>
+        <ol class="timeline" id="timeline"></ol>
+      </div>
+    </section>
+
+    <!-- ===================== NEW CHAPTER ===================== -->
+    <section class="section next" id="next" aria-labelledby="nextTitle">
+      <div class="next-photo" id="nextPhoto" aria-hidden="true"></div>
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">TRK 08 · The New Chapter</p>
+          <h2 id="nextTitle">My story is still being written</h2>
+          <p class="lede">“There is more to learn, more music to create, more people to work with, and more young musicians to encourage.”</p>
+        </header>
+        <div class="projects" id="projects"></div>
+      </div>
+    </section>
+
+    <!-- ===================== LEGACY ===================== -->
+    <section class="section legacy" id="legacy" aria-labelledby="legacyTitle">
+      <div class="wrap narrow">
+        <p class="kicker">The Legacy</p>
+        <h2 id="legacyTitle" class="legacy-title">Helping others realise their dreams</h2>
+        <div class="legacy-body reveal">
+          <p>Victor has spent his working life on the other side of the glass — building soundtracks, recording first-time singers, mixing bands for festival crowds, and finishing stems sent from abroad. His contribution is measured less in his own name than in the records and performances of the people he has worked with.</p>
+          <p>“A music producer’s role goes beyond operating equipment, arranging instruments, or adjusting levels on a mixing console. It also involves listening, understanding an artist’s vision, offering guidance, and helping that artist bring out the best in their work.”</p>
+          <p>“Sometimes, what an artist needs most is someone who believes in their idea, recognises its potential, and is willing to work patiently with them until the music begins to take shape. That is a responsibility I take seriously.”</p>
+        </div>
+        <blockquote class="signature reveal" id="signatureQuote"></blockquote>
+      </div>
+    </section>
+
+    <!-- ===================== CONTACT ===================== -->
+    <section class="section section-alt" id="contact" aria-labelledby="contactTitle">
+      <div class="wrap contact-grid">
+        <div>
+          <p class="kicker">Connect</p>
+          <h2 id="contactTitle">Bring your music to life</h2>
+          <p class="lede">Production · Recording · Mixing &amp; mastering · Live sound · Collaboration</p>
+          <ul class="contact-lines" id="contactLines"></ul>
+          <ul class="socials" id="socials"></ul>
+        </div>
+        <form class="enquiry" id="enquiryForm" novalidate>
+          <label>Your name<input name="name" autocomplete="name" required></label>
+          <label>Email<input name="email" type="email" autocomplete="email" required></label>
+          <label>What is it about?
+            <select name="type">
+              <option>Music production</option><option>Recording</option><option>Mixing &amp; mastering</option>
+              <option>Live sound</option><option>Collaboration</option><option>Other</option>
+            </select>
+          </label>
+          <label>Message<textarea name="message" rows="5" required></textarea></label>
+          <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
+          <button class="btn btn-primary" type="submit">Send enquiry</button>
+          <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-grid">
+      <div>
+        <p class="footer-name">Victor Uringtho</p>
+        <p class="muted" id="footerRoles"></p>
+      </div>
+      <ul class="footer-links" id="footerSocials"></ul>
+    </div>
+    <svg class="strings strings-footer" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 6 Q600 6 1200 6"/><path d="M0 16 Q600 16 1200 16"/><path d="M0 26 Q600 26 1200 26"/>
+      <path d="M0 36 Q600 36 1200 36"/><path d="M0 46 Q600 46 1200 46"/><path d="M0 56 Q600 56 1200 56"/>
+    </svg>
+    <p class="copyright wrap">© <span id="year">2026</span> Victor Unyuthfua Uringtho. All rights reserved.</p>
+  </footer>
+
+  <!-- Lightbox -->
+  <dialog class="lightbox" id="lightbox" aria-label="Photograph">
+    <button class="lb-close" id="lbClose" aria-label="Close">×</button>
+    <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous photograph">‹</button>
+    <figure><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure>
+    <button class="lb-nav lb-next" id="lbNext" aria-label="Next photograph">›</button>
+  </dialog>
+
+  <!-- Search -->
+  <dialog class="search" id="searchDialog" aria-label="Search">
+    <div class="search-box">
+      <input id="searchInput" type="search" placeholder="Search artists, music, bands, events, years…" aria-label="Search">
+      <ul id="searchResults" class="search-results"></ul>
+      <p class="muted small">Esc to close</p>
+    </div>
+  </dialog>
+
+  <!-- Content from the Google Sheet, injected server-side (one request, no loading spinner) -->
+  <script>window.VU_DATA = <?!= dataJson ?>;</script>
+  <?!= include('Assets') ?>
+  <?!= include('Scripts') ?>
+</body>
+</html>

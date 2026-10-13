@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body{font:13px/1.5 system-ui,sans-serif;margin:0;padding:14px;color:#222}
+    h2{font-size:15px;margin:0 0 4px} .muted{color:#777}
+    .counts{display:grid;grid-template-columns:1fr auto;gap:2px 10px;margin:10px 0 16px;padding:10px;background:#f6f1e8;border-radius:8px}
+    .item{padding:8px 0;border-bottom:1px solid #eee} .item b{color:#8d5a26}
+    .tag{font:11px ui-monospace,monospace;background:#fff3cf;border:1px dashed #d4a017;padding:1px 4px;border-radius:3px}
+    button{background:#c98d4b;border:0;color:#fff;padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:600}
+  </style>
+</head>
+<body>
+  <h2>Content health</h2>
+  <p class="muted">Everything still marked [ADD …] or [CONFIRM …]. Visitors never see these — fill them in, then use <i>Portfolio → Publish changes</i>.</p>
+  <button onclick="load()">Refresh</button>
+  <div id="out" class="muted" style="margin-top:12px">Checking…</div>
+  <script>
+    function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+    function load(){
+      document.getElementById('out').textContent='Checking…';
+      google.script.run.withSuccessHandler(function(r){
+        var h='<div class="counts">'+Object.keys(r.counts).map(function(k){return '<span>'+k+'</span><b>'+r.counts[k]+'</b>'}).join('')+'</div>';
+        h+='<h2>'+r.missing.length+' fields waiting for content</h2>';
+        h+=r.missing.map(function(m){return '<div class="item"><b>'+esc(m.sheet)+'</b> · row '+m.row+' · '+esc(m.column)+'<br>'+esc(m.label)+' <span class="tag">'+esc(m.value)+'</span></div>'}).join('');
+        document.getElementById('out').innerHTML=h;
+      }).withFailureHandler(function(e){document.getElementById('out').textContent='Error: '+e.message}).getContentHealth();
+    }
+    load();
+  </script>
+</body>
+</html>
