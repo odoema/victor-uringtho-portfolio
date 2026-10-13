@@ -174,7 +174,7 @@
         '<div class="chapter-main reveal"><h3>' + t(c.title) + '</h3>' +
           (has(c.summary) ? '<p class="chapter-summary">' + t(c.summary) + '</p>' : '') +
           '<div class="chapter-body">' + paras(c.body) + '</div>' +
-          (has(c.quote) ? '<blockquote class="pull">“' + t(c.quote) + '”</blockquote>' : '') + fig +
+          (has(c.quote) ? '<blockquote class="pull">“' + t(String(c.quote).replace(/“/g, '‘').replace(/”/g, '’')) + '”</blockquote>' : '') + fig +
         '</div></article>';
     }).join('');
   }
@@ -491,11 +491,87 @@
     });
   }
 
+  /* ================= MOBILE ================= */
+  function initMobile() {
+    var mq = window.matchMedia('(max-width: 720px)');
+    var RAILS = [['#musicGrid', 'releases'], ['#artistGrid', 'artists'], ['#peopleList', 'people'],
+                 ['#projects', 'projects'], ['#services', 'services'], ['#eventList', 'events']];
+    var hints = [];
+
+    function count(el) { return $$(':scope > *', el).filter(function (c) { return !c.hidden; }).length; }
+    function apply() {
+      var on = mq.matches;
+      // Swipe rails
+      hints.forEach(function (h) { h.remove(); }); hints = [];
+      RAILS.forEach(function (r) {
+        var el = $(r[0]); if (!el) return;
+        el.classList.toggle('rail', on && count(el) > 1);
+        if (on && count(el) > 1) {
+          var h = document.createElement('div');
+          h.className = 'swipe-hint'; h.setAttribute('aria-hidden', 'true');
+          h.innerHTML = '<span>' + count(el) + ' ' + r[1] + '</span><b>Swipe →</b>';
+          el.parentNode.insertBefore(h, el); hints.push(h);
+        }
+      });
+      // Chapters: first paragraph + "continue reading"
+      $$('.chapter').forEach(function (ch) {
+        var paras = $$('.chapter-body p', ch);
+        var btn = $('.read-more', ch);
+        if (paras.length < 2) return;
+        if (!btn) {
+          btn = document.createElement('button');
+          btn.type = 'button'; btn.className = 'read-more';
+          btn.addEventListener('click', function () {
+            var open = ch.classList.toggle('collapsed') === false;
+            btn.setAttribute('aria-expanded', open);
+            btn.textContent = open ? 'Show less ↑' : 'Continue reading ↓';
+            if (!open) ch.scrollIntoView({ block: 'start', behavior: REDUCED ? 'auto' : 'smooth' });
+          });
+          $('.chapter-body', ch).after(btn);
+        }
+        ch.classList.toggle('collapsed', on);
+        btn.setAttribute('aria-expanded', !on);
+        btn.textContent = 'Continue reading ↓';
+      });
+      // Skills: accordion, first group open
+      $$('.strip').forEach(function (s, i) {
+        var head = $('.strip-head', s);
+        if (!head.hasAttribute('data-acc')) {
+          head.setAttribute('data-acc', '1');
+          head.addEventListener('click', function () { if (mq.matches) toggle(s); });
+          head.addEventListener('keydown', function (e) { if (mq.matches && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(s); } });
+        }
+        if (on) { head.setAttribute('role', 'button'); head.tabIndex = 0; s.classList.toggle('open', i === 0); head.setAttribute('aria-expanded', i === 0); }
+        else { head.removeAttribute('role'); head.removeAttribute('tabindex'); s.classList.add('open'); }
+      });
+    }
+    function toggle(s) { var o = s.classList.toggle('open'); $('.strip-head', s).setAttribute('aria-expanded', o); }
+
+    // Filters change card counts — keep hints accurate
+    $$('.filters').forEach(function (f) { f.addEventListener('click', function () { setTimeout(apply, 0); }); });
+    if (mq.addEventListener) mq.addEventListener('change', apply); else mq.addListener(apply);
+    apply();
+
+    // Bottom tab bar: highlight the current section
+    var tabs = $$('.tabbar a');
+    var ids = { home: '', story: 'story', people: 'story', music: 'music', artists: 'artists', bands: 'artists', craft: 'craft',
+                events: 'craft', milestones: 'craft', next: 'contact', legacy: 'contact', contact: 'contact' };
+    var spy = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var key = ids[e.target.id];
+        tabs.forEach(function (t) { var on = t.getAttribute('href') === '#' + key; t.classList.toggle('active', on); if (on) t.setAttribute('aria-current', 'true'); else t.removeAttribute('aria-current'); });
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    Object.keys(ids).forEach(function (id) { var s = document.getElementById(id); if (s) spy.observe(s); });
+    var more = $('#tabMore'); if (more) more.addEventListener('click', function () { $('#menuBtn').click(); });
+  }
+
   /* ================= BOOT ================= */
   function boot() {
     [renderHero, renderStats, renderChapters, renderPeople, renderMusic, renderArtists, renderBands,
      renderSkills, renderEvents, renderTimeline, renderProjects, renderContact,
-     initNav, initReveal, initLightbox, initSearch, initStrings].forEach(function (fn) {
+     initNav, initReveal, initLightbox, initSearch, initStrings, initMobile].forEach(function (fn) {
       try { fn(); } catch (err) { console.error(fn.name, err); }   // one bad row never blanks the whole site
     });
     requestAnimationFrame(function () { document.body.classList.add('loaded'); });
