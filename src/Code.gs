@@ -236,6 +236,7 @@ function onOpen() {
     .addItem('Publish changes (clear cache)', 'publishChanges')
     .addItem('Content health — what is missing', 'showContentHealth')
     .addItem('Show my preview link key', 'showPreviewKey')
+    .addItem('Sync new content from code (keeps your edits)', 'syncSeedToSheet')
     .addSeparator()
     .addItem('First-time setup (build tabs + seed content)', 'setupPortfolio')
     .addToUi();
@@ -333,6 +334,90 @@ function setupPortfolio() {
   if (def && ss.getSheets().length > 1 && def.getLastRow() === 0) ss.deleteSheet(def);
   publishChanges();
   toast_('Setup complete. ' + Object.keys(SCHEMA).length + ' tabs ready. Preview key: ' + props.getProperty('PREVIEW_KEY'));
+}
+
+/**
+ * Re-runnable. Copies NEW content from Seed.gs into the Sheet WITHOUT overwriting
+ * anything already edited in the Sheet:
+ *  - appends rows that don't exist yet (PHOTOS by image, others by title/name)
+ *  - fills image cells that are empty, [ADD …] or old asset: references
+ *  - applies wording fixes listed in TEXT_FIXES
+ */
+var TEXT_FIXES = [
+  ['CHAPTERS', 'body', 'Akai DPS16 — sixteen tracks', 'Akai DPS16 Digital Multi-track Recorder — sixteen tracks'],
+  ['MUSIC', 'description', 'chose to invest in his own music.', 'chose to invest in his own music. Twelve tracks, featuring Paul Mugarura and Peter Basaza. [CONFIRM YEAR: the album files say 2001, the memoir says 2002]']
+];
+// Cells filled from the seed when they are still empty in the Sheet (never overwrites your text)
+var FILL_FIELDS = { MUSIC: ['id', ['audio_url']] };
+function syncSeedToSheet() {
+  var ss = getSheet_(), seed = getSeed_(), log = [];
+  if (!ss) throw new Error('No Sheet connected.');
+  function rows(name) { return sheetToObjects_(ss.getSheetByName(name)); }
+  function col(name, header) { return SCHEMA[name].indexOf(header) + 1; }
+  function emptyish(v) { v = String(v == null ? '' : v); return !v || isPlaceholder_(v) || v.indexOf('asset:') === 0; }
+  var seedPhotoByAsset = {};
+  seed.PROFILE.forEach(function (r) { if (r.key === 'hero_image') seedPhotoByAsset['asset:portrait'] = r.value; });
+  seed.PHOTOS.forEach(function (r) { if (/victor-casual/.test(r.image)) seedPhotoByAsset['asset:casual'] = r.image; });
+
+  // 1. Replace old embedded-asset references with hosted image URLs
+  ['PROFILE', 'PHOTOS'].forEach(function (name) {
+    var sh = ss.getSheetByName(name), c = col(name, name === 'PROFILE' ? 'value' : 'image');
+    rows(name).forEach(function (r, i) {
+      var v = name === 'PROFILE' ? r.value : r.image;
+      if (seedPhotoByAsset[v]) { sh.getRange(i + 2, c).setValue(seedPhotoByAsset[v]); log.push(name + ' row ' + (i + 2) + ': ' + v + ' → hosted image'); }
+    });
+  });
+
+  // 2. Append rows that are new in the seed
+  var keyOf = { PHOTOS: 'image', EVENTS: 'title', MILESTONES: 'title', BANDS: 'name', ARTISTS: 'name', MUSIC: 'id', PEOPLE: 'name', PROJECTS: 'title', SERVICES: 'service', SKILLS: 'skill' };
+  Object.keys(keyOf).forEach(function (name) {
+    var sh = ss.getSheetByName(name), k = keyOf[name];
+    var have = rows(name).map(function (r) { return String(r[k]); });
+    (seed[name] || []).forEach(function (o) {
+      if (have.indexOf(String(o[k])) > -1) return;
+      sh.appendRow(SCHEMA[name].map(function (h) { return o[h] === undefined ? '' : o[h]; }));
+      log.push(name + ': added ' + o[k]);
+    });
+  });
+
+  // 3. Fill empty image cells on chapters and bands
+  [['CHAPTERS', 'id'], ['BANDS', 'name']].forEach(function (pair) {
+    var name = pair[0], k = pair[1], sh = ss.getSheetByName(name);
+    var bySeed = {}; seed[name].forEach(function (o) { bySeed[o[k]] = o; });
+    rows(name).forEach(function (r, i) {
+      var s = bySeed[r[k]]; if (!s || !s.image || isPlaceholder_(s.image)) return;
+      if (emptyish(r.image)) {
+        sh.getRange(i + 2, col(name, 'image')).setValue(s.image);
+        if (name === 'CHAPTERS' && !r.image_caption && s.image_caption) sh.getRange(i + 2, col(name, 'image_caption')).setValue(s.image_caption);
+        log.push(name + ': image for ' + r[k]);
+      }
+    });
+  });
+
+  // 3b. Fill empty media cells (e.g. the album tracklist)
+  Object.keys(FILL_FIELDS).forEach(function (name) {
+    var k = FILL_FIELDS[name][0], fields = FILL_FIELDS[name][1], sh = ss.getSheetByName(name);
+    var bySeed = {}; (seed[name] || []).forEach(function (o) { bySeed[o[k]] = o; });
+    rows(name).forEach(function (r, i) {
+      var s = bySeed[r[k]]; if (!s) return;
+      fields.forEach(function (f) {
+        if (s[f] && !isPlaceholder_(s[f]) && emptyish(r[f])) { sh.getRange(i + 2, col(name, f)).setValue(s[f]); log.push(name + ': ' + f + ' for ' + r[k]); }
+      });
+    });
+  });
+
+  // 4. Wording fixes (only where the old wording is still present)
+  TEXT_FIXES.forEach(function (f) {
+    var sh = ss.getSheetByName(f[0]), c = col(f[0], f[1]);
+    rows(f[0]).forEach(function (r, i) {
+      var v = String(r[f[1]] || '');
+      if (v.indexOf(f[2]) > -1 && v.indexOf(f[3]) === -1) { sh.getRange(i + 2, c).setValue(v.split(f[2]).join(f[3])); log.push(f[0] + ' row ' + (i + 2) + ': wording fix'); }
+    });
+  });
+
+  publishChanges();
+  Logger.log(log.join('\n') || 'Nothing new to sync.');
+  return log;
 }
 
 function toast_(msg) {

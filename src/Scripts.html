@@ -64,7 +64,19 @@
     if (/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(url)) return { native: url, label: 'Play audio' };
     return null;
   }
+  // audio_url may hold one link, or an album: one track per line as "Title | URL"
+  function parseTracks(v) {
+    return String(v || '').split(/\n+/).map(function (l) {
+      l = l.trim(); if (!l || isPh(l)) return null;
+      var i = l.lastIndexOf('|'), title = i > -1 ? l.slice(0, i).trim() : '', url = (i > -1 ? l.slice(i + 1) : l).trim();
+      if (!/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(url)) return null;
+      if (!title) title = decodeURIComponent(url.split('/').pop().replace(/\.\w+$/, '')).replace(/^\d+[-_ ]*/, '').replace(/[-_]+/g, ' ');
+      return { t: title, u: url };
+    }).filter(Boolean);
+  }
   function playerFor(item) {
+    var tr = parseTracks(item.audio_url);
+    if (tr.length > 1) return { tracks: tr, label: 'Play the album · ' + tr.length + ' tracks' };
     if (has(item.spotify_url) && !isPh(item.spotify_url)) { var s = spotifyEmbed(item.spotify_url); if (s) return s; }
     if (has(item.audio_url) && !isPh(item.audio_url)) { var a = audioEmbed(item.audio_url); if (a) return a; }
     if (has(item.youtube_url) && !isPh(item.youtube_url)) { var y = youtubeEmbed(item.youtube_url); if (y) return y; }
@@ -73,6 +85,7 @@
   function mountPlayer(btn) {
     var cfg = JSON.parse(btn.getAttribute('data-player'));
     var box = btn.parentNode, el;
+    if (cfg.tracks) { el = albumPlayer(cfg.tracks, btn.getAttribute('data-title')); box.replaceChild(el, btn); playTrack(el, 0); return; }
     if (cfg.native) {
       el = document.createElement('audio');
       el.controls = true; el.preload = 'none'; el.src = cfg.native; el.className = 'audio-native';
@@ -85,6 +98,35 @@
     }
     box.replaceChild(el, btn);
     if (el.play) el.play().catch(function () {});
+  }
+
+  function albumPlayer(tracks, album) {
+    var w = document.createElement('div');
+    w.className = 'album-player';
+    w.innerHTML = '<div class="now"><span class="eq on" aria-hidden="true"><i></i><i></i><i></i></span><span class="now-t"></span></div>' +
+      '<audio class="audio-native" controls preload="none"></audio>' +
+      '<ol class="tracklist" aria-label="' + esc(album || 'Album') + ' tracklist">' + tracks.map(function (x, i) {
+        return '<li><button type="button" data-i="' + i + '"><span class="n">' + (i < 9 ? '0' : '') + (i + 1) + '</span><span class="tt">' + esc(x.t) + '</span></button></li>';
+      }).join('') + '</ol>';
+    w._tracks = tracks;
+    var au = w.querySelector('audio');
+    au.addEventListener('ended', function () { if (w._i + 1 < tracks.length) playTrack(w, w._i + 1); });
+    au.addEventListener('play', function () {
+      w.classList.add('playing');
+      $$('audio').forEach(function (o) { if (o !== au && !o.paused) o.pause(); });
+    });
+    au.addEventListener('pause', function () { w.classList.remove('playing'); });
+    w.querySelector('.tracklist').addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-i]'); if (b) playTrack(w, +b.getAttribute('data-i'));
+    });
+    return w;
+  }
+  function playTrack(w, i) {
+    var au = w.querySelector('audio'), x = w._tracks[i];
+    w._i = i; au.src = x.u;
+    w.querySelector('.now-t').textContent = (i + 1) + '. ' + x.t;
+    $$('.tracklist button', w).forEach(function (b, j) { b.setAttribute('aria-current', j === i ? 'true' : 'false'); });
+    au.play().catch(function () {});
   }
 
   /* ---------------- filters ---------------- */

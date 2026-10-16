@@ -216,6 +216,21 @@ p{margin:0 0 var(--s3)}
 @keyframes eq{0%,100%{height:30%}50%{height:100%}}
 .embed{border:0;width:100%;border-radius:12px;display:block}
 .audio-native{width:100%}
+.album-player{display:flex;flex-direction:column;gap:.6rem}
+.album-player .now{display:flex;align-items:center;gap:.6rem;font:500 .7rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--brass-2);min-height:18px}
+.album-player .eq{display:flex;gap:2px;align-items:flex-end;height:12px;opacity:.35}
+.album-player .eq i{width:3px;background:currentColor;height:40%;border-radius:1px}
+.album-player.playing .eq{opacity:1}
+.album-player.playing .eq i{animation:eq 1s ease-in-out infinite}
+.album-player .eq i:nth-child(2){animation-delay:.2s}.album-player .eq i:nth-child(3){animation-delay:.4s}
+.tracklist{list-style:none;margin:0;padding:0;border-top:1px solid var(--line);max-height:300px;overflow-y:auto;overscroll-behavior:contain}
+.tracklist li{border-bottom:1px solid var(--line)}
+.tracklist button{width:100%;display:flex;gap:.8rem;align-items:baseline;text-align:left;background:none;border:0;color:var(--paper-2);
+  padding:.6rem .25rem;min-height:44px;cursor:pointer;font:500 .88rem var(--f-body);transition:color .2s,padding .2s}
+.tracklist button:hover{color:var(--paper);padding-left:.5rem}
+.tracklist .n{font:500 .68rem var(--f-mono);color:var(--muted);min-width:1.4rem}
+.tracklist button[aria-current="true"]{color:var(--brass-2)}
+.tracklist button[aria-current="true"] .n{color:var(--brass-2)}
 .listen-links{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.82rem}
 .listen-links a{color:var(--brass-2);text-decoration:none}
 .empty-note{grid-column:1/-1;color:var(--muted);font-style:italic;border:1px dashed var(--line-2);border-radius:var(--r);padding:var(--s5);text-align:center}
