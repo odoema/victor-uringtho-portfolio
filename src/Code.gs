@@ -75,6 +75,7 @@ function doGet(e) {
 
   return t.evaluate()
     .setTitle(CONFIG.SITE_TITLE)
+    .setFaviconUrl('https://odoema.github.io/victor-uringtho-portfolio/assets/brand/favicon-32.png')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL); // allows embedding in Google Sites
 }
@@ -348,6 +349,7 @@ function setupPortfolio() {
 var TEXT_FIXES = [
   ['CHAPTERS', 'body', 'Akai DPS16 — sixteen tracks', 'Akai DPS16 Digital Multi-track Recorder — sixteen tracks'],
   ['SERVICES', 'description', 'Original soundtracks made to order. Or buy one of Victor’s existing tracks and beats outright, copyright included.\n• Commission an original soundtrack\n• Buy a ready-made track or beat\n• Buy the copyright', 'Original soundtracks and jingles made to order. Or take one of Victor’s beats — license it, make it exclusive, or buy it outright with the copyright.\n• Commission an original soundtrack or jingle\n• License a beat (basic or exclusive)\n• Buy a beat outright, copyright included'],
+  ['SERVICES', 'description', 'Including remote work — send your stems from anywhere.', 'Send your stems or your studio mix from anywhere in the world. Artists already send Victor jobs online — one came all the way from Dubai.\n• Send your stems or studio mix online\n• Victor mixes and masters the track\n• The finished track is sent back to you'],
   ['MUSIC', 'description', 'chose to invest in his own music.', 'chose to invest in his own music. Twelve tracks, featuring Paul Mugarura and Peter Basaza. [CONFIRM YEAR: the album files say 2001, the memoir says 2002]']
 ];
 // Tabs whose rows are swapped for the new seed, but only if every row still has one of these old default names
@@ -381,11 +383,30 @@ function syncSeedToSheet() {
   Object.keys(REPLACE_IF_DEFAULT).forEach(function (name) {
     var k = REPLACE_IF_DEFAULT[name][0], olds = REPLACE_IF_DEFAULT[name][1], sh = ss.getSheetByName(name);
     var cur = rows(name);
+    cur = cur.filter(function (r) { return String(r[k] || '').trim(); });     // ignore empty checkbox-only rows
     if (!cur.length || !cur.every(function (r) { return olds.indexOf(String(r[k])) > -1; })) return;
     if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).clearContent();
     var vals = seed[name].map(function (o) { return SCHEMA[name].map(function (h) { return o[h] === undefined ? '' : o[h]; }); });
     sh.getRange(2, 1, vals.length, SCHEMA[name].length).setValues(vals);
     log.push(name + ': replaced with the new list (' + vals.length + ' rows)');
+  });
+
+  // 1c. If the new rows were appended next to the old defaults, remove the old ones and re-order
+  Object.keys(REPLACE_IF_DEFAULT).forEach(function (name) {
+    var k = REPLACE_IF_DEFAULT[name][0], newNames = seed[name].map(function (o) { return String(o[k]); });
+    var olds = REPLACE_IF_DEFAULT[name][1].filter(function (n) { return newNames.indexOf(n) < 0; });
+    var sh = ss.getSheetByName(name), kc = col(name, k) - 1, oc = col(name, 'order');
+    var vals = sh.getDataRange().getValues();                  // raw rows, so row numbers are exact
+    var have = vals.slice(1).map(function (r) { return String(r[kc]).trim(); });
+    if (!newNames.every(function (n) { return have.indexOf(n) > -1; })) return;
+    for (var i = vals.length - 1; i >= 1; i--) {
+      var nm = String(vals[i][kc]).trim();
+      if (olds.indexOf(nm) > -1) { sh.deleteRow(i + 1); log.push(name + ': removed old ' + nm); }
+    }
+    sh.getDataRange().getValues().forEach(function (r, j) {
+      var at = j ? newNames.indexOf(String(r[kc]).trim()) : -1;
+      if (at > -1 && Number(r[oc - 1]) !== at + 1) sh.getRange(j + 1, oc).setValue(at + 1);
+    });
   });
 
   // 2. Append rows that are new in the seed
