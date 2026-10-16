@@ -16,6 +16,9 @@ function getSeed_() {
   return {
 
     PROFILE: [
+      { key: 'services_poster', value: 'https://odoema.github.io/victor-uringtho-portfolio/assets/promo/victor-services-poster.jpg', status: 'confirmed' },
+      { key: 'services_tagline', value: 'Your sound. My craft.', status: 'confirmed' },
+      { key: 'services_poster_caption', value: 'Great sound tells great stories.', status: 'confirmed' },
       { key: 'pricing_note', value: 'Prices in Uganda shillings, with US dollar prices for clients abroad. “From” prices depend on the size of the job — you get a firm quote before any work starts.', status: 'confirmed' },
       { key: 'booking_terms', value: '50% deposit to book · Balance on delivery · Mobile Money or bank transfer · Discounts for albums, churches and choirs', status: 'confirmed' },
       { key: 'full_name', value: 'Victor Unyuthfua Uringtho', status: 'confirmed' },
@@ -114,9 +117,9 @@ function getSeed_() {
 
     ARTISTS: [
       { order: 1, name: 'Isaiah Katumwa', category: 'Artists & Groups', roles: '[CONFIRM ROLE]', project: '[ADD PROJECT]', year: '[ADD YEAR]', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
-      { order: 2, name: 'Judith Babirye', category: 'Artists & Groups', roles: '[CONFIRM ROLE]', project: '[ADD PROJECT]', year: '[ADD YEAR]', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
+      { order: 2, name: 'Judith Babirye', category: 'Artists & Groups', roles: '[CONFIRM ROLE]', project: 'Songs: “Mpabatiira Mukama”, “Mpulira Yesu”, “Number One”, “Wakitibwa”', year: '2009', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
       { order: 3, name: 'Michael Kitanda', category: 'Artists & Groups', roles: '[CONFIRM ROLE]', project: '[ADD PROJECT]', year: '[ADD YEAR]', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
-      { order: 4, name: 'The Heralds', category: 'Artists & Groups', roles: '[CONFIRM ROLE]', project: '[ADD PROJECT]', year: '[ADD YEAR]', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
+      { order: 4, name: 'The Heralds', category: 'Artists & Groups', roles: '[CONFIRM ROLE]', project: 'Songs: “Lunaku”, “Tulindirira”', year: '2014', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
       { order: 5, name: 'God’s Image', category: 'Artists & Groups', roles: '[CONFIRM ROLE]', project: '[ADD PROJECT]', year: '[ADD YEAR]', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
       { order: 6, name: 'Dove 7', category: 'Artists & Groups', roles: '[CONFIRM ROLE]', project: '[ADD PROJECT]', year: '[ADD YEAR]', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
       { order: 7, name: 'Zephaniah Mukalere', category: 'Produced', roles: 'Producer, Soundtracks, Recording, Mixing', project: 'First production project', year: 'c. 2000', image: '', spotify_url: '', story: 'The first artist to trust Victor with a full production.', visible: T, status: 'confirmed' },
@@ -125,6 +128,17 @@ function getSeed_() {
       { order: 10, name: 'Soul Beat', category: 'Live Sound', roles: 'Live sound', project: '', year: '[ADD YEAR]', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
       { order: 11, name: 'Code 9', category: 'Live Sound', roles: 'Live sound', project: '', year: '[ADD YEAR]', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
       { order: 12, name: 'Choirs & solo artists', category: 'Artists & Groups', roles: 'Studio & stage', project: '[ADD CHOIR NAMES]', year: '', image: '', spotify_url: '', story: 'Victor has also worked with choirs and solo artists over the years.', visible: T, status: 'confirmed' },
+      { order: 20, name: 'Anglican Flames', category: 'Studio archive', roles: '[CONFIRM ROLE]', project: 'Songs: “Oyo Yesu”, “Yesu Mulungi”, “Yanwanira Entalo Zange”, “Don’t You Care”', year: '2005–2011', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
+      { order: 21, name: 'Carol Budwike', category: 'Studio archive', roles: '[CONFIRM ROLE]', project: 'Songs: “Old Rugged Cross (Luganda edition)”', year: '2014', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
+      { order: 22, name: 'Eron', category: 'Studio archive', roles: '[CONFIRM ROLE]', project: 'Songs: “Omwoyo Gwange”, “Tukunonya”', year: '2014', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
+      { order: 23, name: 'Gooding', category: 'Studio archive', roles: '[CONFIRM ROLE]', project: 'Songs: “Call on Jesus”, “Emam”, “I Got Joy”, “Potu”', year: '2015', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
+      { order: 24, name: 'Gospel Sowers', category: 'Studio archive', roles: '[CONFIRM ROLE]', project: 'Songs: “He Cares”, “Muyimirire”, “No Longer”, “Obutukirivu”', year: '[CONFIRM YEAR: folder says 2012, files 2006]', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
+      { order: 25, name: 'Joan Otule', category: 'Studio archive', roles: '[CONFIRM ROLE]', project: 'Songs: “Righteous Father”, “Mwokozi Amezaliwa”', year: '2025', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
+      { order: 26, name: 'Keith Kibirango [CONFIRM SPELLING]', category: 'Studio archive', roles: '[CONFIRM ROLE]', project: 'Three tracks [ADD SONG TITLES]', year: '2009', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
+      { order: 27, name: 'Namirembe Christian Fellowship Worship Team', category: 'Studio archive', roles: '[CONFIRM ROLE]', project: 'Songs: “Calling Down”, “Lord We Come”', year: '2018', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
+      { order: 28, name: 'Sarah Kotido', category: 'Studio archive', roles: '[CONFIRM ROLE]', project: 'Songs: “Karamoja” and three more [ADD SONG TITLES]', year: '2009', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
+      { order: 29, name: 'Seroma High School', category: 'Studio archive', roles: '[CONFIRM ROLE]', project: 'Songs: “I Will Praise You”, “Living Sacrifice”, “Lord Increase”, “Take Me to Yourself”', year: '2008', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
+      { order: 30, name: 'Reverend Kutesa', category: 'Studio archive', roles: '[CONFIRM ROLE]', project: 'Songs: “Ayio Mungu”', year: '2023', image: '', spotify_url: '', story: '', visible: T, status: 'confirmed' },
       { order: 13, name: 'International artists (remote)', category: 'Mix & Master', roles: 'Mixing, Mastering', project: '[ADD ARTIST NAMES / COUNTRIES]', year: '', image: '', spotify_url: '', story: 'Artists outside Uganda who send their studio stems for mixing and mastering.', visible: T, status: 'confirmed' }
     ],
 

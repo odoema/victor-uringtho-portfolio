@@ -123,14 +123,21 @@
     <!-- ===================== SERVICES ===================== -->
     <section class="section section-alt" id="services" aria-labelledby="servicesTitle">
       <div class="wrap">
+        <div class="svc-intro">
         <header class="section-head">
           <p class="kicker">TRK 03 · Work with Victor</p>
           <h2 id="servicesTitle">Bring your music to Victor</h2>
+          <p class="svc-tag" id="svcTag" hidden></p>
           <p class="lede">In the studio, at your show, or online from anywhere in the world.</p>
           <div class="cur-toggle" id="curToggle" role="group" aria-label="Show prices in" hidden>
             <button type="button" data-cur="UGX" aria-pressed="true">UGX</button><button type="button" data-cur="USD" aria-pressed="false">USD</button>
           </div>
         </header>
+        <figure class="svc-poster" id="svcPoster" hidden>
+          <a id="svcPosterLink" target="_blank" rel="noopener" aria-label="Open Victor’s services poster full size"><img id="svcPosterImg" alt="Poster: Victor Uringtho — recording, mixing and mastering services" loading="lazy" decoding="async" width="1254" height="1254"></a>
+          <figcaption><span id="svcPosterCap"></span><a id="svcPosterSave" download="Victor-Uringtho-services.jpg" target="_blank" rel="noopener">Save &amp; share the poster ↓</a></figcaption>
+        </figure>
+        </div>
         <div class="offers" id="serviceList"></div>
         <div class="licences" id="licences" hidden>
           <h3 class="sub-head">Beat licences</h3>

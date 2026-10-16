@@ -355,7 +355,7 @@ var TEXT_FIXES = [
 // Tabs whose rows are swapped for the new seed, but only if every row still has one of these old default names
 var REPLACE_IF_DEFAULT = { SERVICES: ['service', ['Music production', 'Recording', 'Mixing & mastering', 'Live sound', 'Songwriting & arranging']] };
 // Cells filled from the seed when they are still empty in the Sheet (never overwrites your text)
-var FILL_FIELDS = { MUSIC: ['id', ['audio_url']] };
+var FILL_FIELDS = { MUSIC: ['id', ['audio_url']], ARTISTS: ['name', ['project', 'year']] };
 function syncSeedToSheet() {
   var ss = getSheet_(), seed = getSeed_(), log = [];
   if (!ss) throw new Error('No Sheet connected.');

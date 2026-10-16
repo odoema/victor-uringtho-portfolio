@@ -404,6 +404,14 @@
       });
     }
     host._wired = true;
+    // Services poster + tagline (PROFILE: services_poster, services_tagline, services_poster_caption)
+    var tag = $('#svcTag'); if (tag && has(P.services_tagline)) { tag.textContent = P.services_tagline; tag.hidden = false; }
+    var fig = $('#svcPoster'), purl = img(P.services_poster, 1254);
+    if (fig && purl) {
+      fig.hidden = false;
+      $('#svcPosterImg').src = purl; $('#svcPosterLink').href = purl; $('#svcPosterSave').href = purl;
+      $('#svcPosterCap').textContent = P.services_poster_caption || '';
+    }
     var cs = $('#contactServices'); if (cs) cs.textContent = items.map(function (s) { return s.service; }).join(' · ');
     renderLicences();
   }
