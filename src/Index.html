@@ -31,9 +31,10 @@
       <ul class="nav-links" id="navLinks">
         <li><a href="#story">Story</a></li>
         <li><a href="#music">Music</a></li>
+        <li><a href="#services">Services</a></li>
         <li><a href="#artists">Artists</a></li>
         <li><a href="#bands">Bands</a></li>
-        <li><a href="#craft">Work</a></li>
+        <li><a href="#craft">Craft</a></li>
         <li><a href="#events">Events</a></li>
         <li><a href="#milestones">Milestones</a></li>
         <li><a href="#next">New Chapter</a></li>
@@ -67,7 +68,7 @@
         <div class="hero-cta reveal">
           <a class="btn btn-primary" href="#story">Explore the Journey</a>
           <a class="btn btn-ghost" href="#music">Listen to the Music</a>
-          <a class="btn btn-text" href="#craft">View the Work →</a>
+          <a class="btn btn-text" href="#services">Work with Victor →</a>
         </div>
       </div>
       <!-- Six strings — the guitar he built from wood, a pan and clutch wire -->
@@ -119,10 +120,31 @@
     </section>
 
     <!-- ===================== ARTISTS ===================== -->
-    <section class="section section-alt" id="artists" aria-labelledby="artistsTitle">
+    <!-- ===================== SERVICES ===================== -->
+    <section class="section section-alt" id="services" aria-labelledby="servicesTitle">
       <div class="wrap">
         <header class="section-head">
-          <p class="kicker">TRK 03 · Collaborations</p>
+          <p class="kicker">TRK 03 · Work with Victor</p>
+          <h2 id="servicesTitle">Bring your music to Victor</h2>
+          <p class="lede">In the studio, at your show, or online from anywhere in the world.</p>
+          <div class="cur-toggle" id="curToggle" role="group" aria-label="Show prices in" hidden>
+            <button type="button" data-cur="UGX" aria-pressed="true">UGX</button><button type="button" data-cur="USD" aria-pressed="false">USD</button>
+          </div>
+        </header>
+        <div class="offers" id="serviceList"></div>
+        <div class="licences" id="licences" hidden>
+          <h3 class="sub-head">Beat licences</h3>
+          <p class="muted lic-intro">Three ways to use one of Victor’s beats. Every licence comes with a short written agreement.</p>
+          <div class="tiers" id="tierList"></div>
+        </div>
+        <div class="terms" id="bookingTerms" hidden></div>
+      </div>
+    </section>
+
+    <section class="section" id="artists" aria-labelledby="artistsTitle">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">TRK 04 · Collaborations</p>
           <h2 id="artistsTitle">Artists &amp; groups he has worked with</h2>
           <p class="lede">In the studio and on stage — in Uganda and, through remote mixing and mastering, beyond.</p>
         </header>
@@ -132,10 +154,10 @@
     </section>
 
     <!-- ===================== BANDS ===================== -->
-    <section class="section" id="bands" aria-labelledby="bandsTitle">
+    <section class="section section-alt" id="bands" aria-labelledby="bandsTitle">
       <div class="wrap">
         <header class="section-head">
-          <p class="kicker">TRK 04 · The Bands</p>
+          <p class="kicker">TRK 05 · The Bands</p>
           <h2 id="bandsTitle">On the stage, behind the desk</h2>
         </header>
         <div id="bandCurrent"></div>
@@ -144,24 +166,22 @@
     </section>
 
     <!-- ===================== CRAFT / WORK ===================== -->
-    <section class="section section-alt" id="craft" aria-labelledby="craftTitle">
+    <section class="section" id="craft" aria-labelledby="craftTitle">
       <div class="wrap">
         <header class="section-head">
-          <p class="kicker">TRK 05 · Skills &amp; Craft</p>
+          <p class="kicker">TRK 06 · Skills &amp; Craft</p>
           <h2 id="craftTitle">The craft, and where it came from</h2>
           <p class="lede">Every skill here is tied to the moment Victor earned it.</p>
         </header>
         <div class="console" id="skills"></div>
-        <h3 class="sub-head">Work with Victor</h3>
-        <div class="services" id="services"></div>
       </div>
     </section>
 
     <!-- ===================== EVENTS ===================== -->
-    <section class="section" id="events" aria-labelledby="eventsTitle">
+    <section class="section section-alt" id="events" aria-labelledby="eventsTitle">
       <div class="wrap">
         <header class="section-head">
-          <p class="kicker">TRK 06 · Events &amp; Moments</p>
+          <p class="kicker">TRK 07 · Events &amp; Moments</p>
           <h2 id="eventsTitle">Where the music happened</h2>
         </header>
         <div class="event-list" id="eventList"></div>
@@ -171,10 +191,10 @@
     </section>
 
     <!-- ===================== MILESTONES ===================== -->
-    <section class="section section-alt" id="milestones" aria-labelledby="msTitle">
+    <section class="section" id="milestones" aria-labelledby="msTitle">
       <div class="wrap">
         <header class="section-head">
-          <p class="kicker">TRK 07 · Milestones</p>
+          <p class="kicker">TRK 08 · Milestones</p>
           <h2 id="msTitle">The journey so far</h2>
         </header>
         <ol class="timeline" id="timeline"></ol>
@@ -186,7 +206,7 @@
       <div class="next-photo" id="nextPhoto" aria-hidden="true"></div>
       <div class="wrap">
         <header class="section-head">
-          <p class="kicker">TRK 08 · The New Chapter</p>
+          <p class="kicker">TRK 09 · The New Chapter</p>
           <h2 id="nextTitle">My story is still being written</h2>
           <p class="lede">“There is more to learn, more music to create, more people to work with, and more young musicians to encourage.”</p>
         </header>
@@ -214,7 +234,7 @@
         <div>
           <p class="kicker">Connect</p>
           <h2 id="contactTitle">Bring your music to life</h2>
-          <p class="lede">Production · Recording · Mixing &amp; mastering · Live sound · Collaboration</p>
+          <p class="lede" id="contactServices">Studio recording · Live performance recording · Mixing &amp; mastering · Soundtracks &amp; beats</p>
           <ul class="contact-lines" id="contactLines"></ul>
           <ul class="socials" id="socials"></ul>
         </div>
@@ -222,9 +242,9 @@
           <label>Your name<input name="name" autocomplete="name" required></label>
           <label>Email<input name="email" type="email" autocomplete="email" required></label>
           <label>What is it about?
-            <select name="type">
-              <option>Music production</option><option>Recording</option><option>Mixing &amp; mastering</option>
-              <option>Live sound</option><option>Collaboration</option><option>Other</option>
+            <select name="type" id="enquiryType">
+              <option>Studio recording</option><option>Live performance recording</option><option>Mixing &amp; mastering</option>
+              <option>Soundtracks &amp; beats</option><option>Collaboration</option><option>Other</option>
             </select>
           </label>
           <label>Message<textarea name="message" rows="5" required></textarea></label>
@@ -240,7 +260,7 @@
   <nav class="tabbar" aria-label="Quick navigation">
     <a href="#story"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>Story</a>
     <a href="#music"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Music</a>
-    <a href="#artists"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/></svg>Artists</a>
+    <a href="#services"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><rect x="2" y="14" width="5" height="7" rx="1.5"/><rect x="17" y="14" width="5" height="7" rx="1.5"/></svg>Services</a>
     <a href="#contact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H8l-4 4z"/></svg>Contact</a>
     <button type="button" id="tabMore" aria-label="Open full menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>More</button>
   </nav>

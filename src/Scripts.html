@@ -317,9 +317,95 @@
           return '<div class="skill"><div class="skill-name">' + t(s.skill) + '</div>' + (has(s.evidence) ? '<p class="skill-ev">' + t(s.evidence) + '</p>' : '') + '</div>';
         }).join('') + '</section>';
     }).join('');
-    $('#services').innerHTML = list('SERVICES').map(function (s) {
-      return '<div class="service reveal"><h3>' + t(s.service) + '</h3><p>' + t(s.description) + '</p></div>';
+  }
+
+  /* Prices — PRICING tab; shown in UGX or USD */
+  var CUR = (function () {
+    try { var s = localStorage.getItem('vu_cur'); if (s) return s; } catch (e) {}
+    var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    return /^Africa\/(Kampala|Nairobi|Dar_es_Salaam|Kigali|Juba|Bujumbura|Kinshasa|Lubumbashi)$/.test(tz) ? 'UGX' : 'USD';
+  })();
+  function priceRows(service) { return list('PRICING').filter(function (p) { return p.service === service && (has(p.price_ugx) || has(p.price_usd)); }); }
+  function money(p) {
+    var ugx = Number(String(p.price_ugx).replace(/[^\d.]/g, '')), usd = Number(String(p.price_usd).replace(/[^\d.]/g, ''));
+    var showUgx = CUR === 'UGX' ? ugx || !usd : !usd && ugx;
+    var txt = showUgx ? 'UGX ' + Math.round(ugx).toLocaleString('en-US') : 'US$' + Math.round(usd).toLocaleString('en-US');
+    return (has(p.prefix) ? '<small>' + t(p.prefix) + '</small> ' : '') + '<span class="amt">' + txt + '</span>';
+  }
+  function priceList(service) {
+    var rows = priceRows(service); if (!rows.length) return '';
+    return '<ul class="prices">' + rows.map(function (p) {
+      return '<li' + (p.highlight === true ? ' class="hl"' : '') + '><span class="pi">' + t(p.item) +
+        (has(p.details) ? '<em>' + t(p.details) + '</em>' : '') + '</span><span class="pv">' + money(p) +
+        (has(p.unit) ? '<i>' + t(p.unit) + '</i>' : '') + '</span></li>';
+    }).join('') + '</ul>';
+  }
+  function renderLicences() {
+    var tiers = priceRows('Beat licences'), box = $('#licences');
+    if (!box) return;
+    box.hidden = !tiers.length;
+    $('#tierList').innerHTML = tiers.map(function (p) {
+      var lines = String(p.details || '').split(/\n+/).map(function (l) { return l.trim(); }).filter(has);
+      var lead = lines.filter(function (l) { return !/^[•\-–]/.test(l); });
+      var pts = lines.filter(function (l) { return /^[•\-–]/.test(l); }).map(function (l) { return l.replace(/^[•\-–]\s*/, ''); });
+      return '<article class="tier reveal' + (p.highlight === true ? ' hl' : '') + '">' +
+        (p.highlight === true ? '<span class="tier-flag">Recommended</span>' : '') +
+        '<h4>' + t(p.item) + '</h4><p class="tier-price">' + money(p) + (has(p.unit) ? '<i>' + t(p.unit) + '</i>' : '') + '</p>' +
+        lead.map(function (l) { return '<p class="tier-lead">' + t(l) + '</p>'; }).join('') +
+        (pts.length ? '<ul class="tier-pts">' + pts.map(function (l) { return '<li>' + t(l) + '</li>'; }).join('') + '</ul>' : '') +
+        '<a class="offer-cta" href="#contact" data-service="Soundtracks & beats" data-note="I’m interested in the ' + esc(p.item) + ' for one of Victor’s beats.">Choose ' + esc(String(p.item).toLowerCase()) + ' →</a></article>';
     }).join('');
+    var terms = [P.pricing_note, P.booking_terms].filter(has), tb = $('#bookingTerms');
+    if (tb) { tb.hidden = !terms.length; tb.innerHTML = terms.map(function (x) { return '<p>' + t(x) + '</p>'; }).join(''); }
+    var tg = $('#curToggle');
+    if (tg && list('PRICING').length) {
+      tg.hidden = false;
+      $$('button', tg).forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-cur') === CUR); });
+      if (!tg._wired) {
+        tg._wired = true;
+        tg.addEventListener('click', function (e) {
+          var b = e.target.closest('button[data-cur]'); if (!b || b.getAttribute('data-cur') === CUR) return;
+          CUR = b.getAttribute('data-cur'); try { localStorage.setItem('vu_cur', CUR); } catch (err) {}
+          renderServices();
+          $$('#services .reveal').forEach(function (el) { el.classList.add('in'); });
+        });
+      }
+    }
+  }
+
+  /* Services — description: first paragraph is the pitch; lines starting with "•" become steps/points */
+  function renderServices() {
+    var items = list('SERVICES');
+    var host = $('#serviceList'); if (!host) return;
+    if (!items.length) { $('#services').hidden = true; return; }
+    host.innerHTML = items.map(function (s, i) {
+      var lines = String(s.description || '').split(/\n+/).map(function (l) { return l.trim(); }).filter(has);
+      var pitch = lines.filter(function (l) { return !/^[•\-–]/.test(l); });
+      var points = lines.filter(function (l) { return /^[•\-–]/.test(l); }).map(function (l) { return l.replace(/^[•\-–]\s*/, ''); });
+      return '<article class="offer reveal" id="svc-' + slug(s.service) + '">' +
+        '<span class="offer-n" aria-hidden="true">' + String(i + 1).padStart(2, '0') + '</span>' +
+        '<h3>' + t(s.service) + '</h3>' +
+        pitch.map(function (p) { return '<p>' + t(p) + '</p>'; }).join('') +
+        (points.length ? '<ol class="offer-steps">' + points.map(function (p) { return '<li>' + t(p) + '</li>'; }).join('') + '</ol>' : '') +
+        priceList(s.service) +
+        '<a class="offer-cta" href="#contact" data-service="' + esc(s.service) + '" aria-label="Enquire about ' + esc(s.service) + '">Enquire now →</a>' +
+        '</article>';
+    }).join('');
+    // Enquiry form follows the services list, and each card pre-selects its service
+    var sel = $('#enquiryType');
+    if (sel) {
+      sel.innerHTML = items.map(function (s) { return '<option>' + esc(s.service) + '</option>'; }).join('') + '<option>Collaboration</option><option>Other</option>';
+      if (!host._wired) $('#services').addEventListener('click', function (e) {
+        var a = e.target.closest('.offer-cta'); if (!a) return;
+        sel.value = a.getAttribute('data-service');
+        var msg = $('#enquiryForm textarea'), note = a.getAttribute('data-note');
+        if (msg && note && !msg.value.trim()) msg.value = note + '\n\n';
+        setTimeout(function () { var m = $('#enquiryForm textarea'); if (m) m.focus({ preventScroll: true }); }, 600);
+      });
+    }
+    host._wired = true;
+    var cs = $('#contactServices'); if (cs) cs.textContent = items.map(function (s) { return s.service; }).join(' · ');
+    renderLicences();
   }
 
   var PHOTOS = [];
@@ -447,6 +533,7 @@
     list('MILESTONES').forEach(function (m) { add('Milestone', m.title, m.year + ' ' + m.description, '#milestones'); });
     list('PEOPLE').forEach(function (p) { add('Person', p.name, p.relationship + ' ' + p.contribution, '#people'); });
     list('SKILLS').forEach(function (s) { add('Skill', s.skill, s.group + ' ' + s.evidence, '#craft'); });
+    list('SERVICES').forEach(function (s) { add('Service', s.service, s.description, '#svc-' + slug(s.service)); });
   }
   function initSearch() {
     buildIndex();
@@ -537,7 +624,7 @@
   function initMobile() {
     var mq = window.matchMedia('(max-width: 720px)');
     var RAILS = [['#musicGrid', 'releases'], ['#artistGrid', 'artists'], ['#peopleList', 'people'],
-                 ['#projects', 'projects'], ['#services', 'services'], ['#eventList', 'events']];
+                 ['#projects', 'projects'], ['#eventList', 'events']];
     var hints = [];
 
     function count(el) { return $$(':scope > *', el).filter(function (c) { return !c.hidden; }).length; }
@@ -596,8 +683,8 @@
 
     // Bottom tab bar: highlight the current section
     var tabs = $$('.tabbar a');
-    var ids = { home: '', story: 'story', people: 'story', music: 'music', artists: 'artists', bands: 'artists', craft: 'craft',
-                events: 'craft', milestones: 'craft', next: 'contact', legacy: 'contact', contact: 'contact' };
+    var ids = { home: '', story: 'story', people: 'story', music: 'music', services: 'services', artists: 'story', bands: 'story', craft: 'story',
+                events: 'story', milestones: 'story', next: 'contact', legacy: 'contact', contact: 'contact' };
     var spy = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         if (!e.isIntersecting) return;
@@ -611,7 +698,7 @@
 
   /* ================= BOOT ================= */
   function boot() {
-    [renderHero, renderStats, renderChapters, renderPeople, renderMusic, renderArtists, renderBands,
+    [renderHero, renderStats, renderChapters, renderPeople, renderMusic, renderServices, renderArtists, renderBands,
      renderSkills, renderEvents, renderTimeline, renderProjects, renderContact,
      initNav, initReveal, initLightbox, initSearch, initStrings, initMobile].forEach(function (fn) {
       try { fn(); } catch (err) { console.error(fn.name, err); }   // one bad row never blanks the whole site

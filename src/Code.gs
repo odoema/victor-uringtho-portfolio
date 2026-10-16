@@ -47,10 +47,12 @@ var SCHEMA = {
   PROJECTS:     ['order', 'title', 'type', 'stage', 'description', 'image', 'link', 'visible', 'status'],
   SERVICES:     ['order', 'service', 'description', 'visible', 'status'],
   SOCIAL_LINKS: ['order', 'platform', 'url', 'label', 'visible', 'status'],
+  PRICING:      ['order', 'service', 'item', 'prefix', 'price_ugx', 'price_usd', 'unit', 'details', 'highlight', 'visible', 'status'],
+  UPRS_WORKS:   ['order', 'title', 'album', 'year', 'duration', 'writers_composers', 'splits', 'performers', 'isrc', 'uprs_status', 'notes'],
   ENQUIRIES:    ['timestamp', 'name', 'email', 'enquiry_type', 'message']
 };
 
-var PRIVATE_SHEETS = { ENQUIRIES: true };   // never sent to the browser
+var PRIVATE_SHEETS = { ENQUIRIES: true, UPRS_WORKS: true };   // never sent to the browser
 
 /* ===========================================================================
  *  WEB APP
@@ -315,13 +317,13 @@ function setupPortfolio() {
       sh.getRange(2, statusCol, 500, 1).setDataValidation(SpreadsheetApp.newDataValidation()
         .requireValueInList(['confirmed', 'needs-confirmation', 'placeholder'], true).build());
     }
-    ['visible', 'featured', 'is_current'].forEach(function (c) {
+    ['visible', 'featured', 'is_current', 'highlight'].forEach(function (c) {
       var idx = headers.indexOf(c) + 1;
       if (idx) sh.getRange(2, idx, 500, 1).insertCheckboxes();
     });
     if (rows.length) {
       // re-apply checkbox values (insertCheckboxes resets blanks to FALSE)
-      ['visible', 'featured', 'is_current'].forEach(function (c) {
+      ['visible', 'featured', 'is_current', 'highlight'].forEach(function (c) {
         var idx = headers.indexOf(c);
         if (idx < 0) return;
         sh.getRange(2, idx + 1, rows.length, 1).setValues(rows.map(function (r) { return [r[idx] === true]; }));
@@ -345,8 +347,11 @@ function setupPortfolio() {
  */
 var TEXT_FIXES = [
   ['CHAPTERS', 'body', 'Akai DPS16 — sixteen tracks', 'Akai DPS16 Digital Multi-track Recorder — sixteen tracks'],
+  ['SERVICES', 'description', 'Original soundtracks made to order. Or buy one of Victor’s existing tracks and beats outright, copyright included.\n• Commission an original soundtrack\n• Buy a ready-made track or beat\n• Buy the copyright', 'Original soundtracks and jingles made to order. Or take one of Victor’s beats — license it, make it exclusive, or buy it outright with the copyright.\n• Commission an original soundtrack or jingle\n• License a beat (basic or exclusive)\n• Buy a beat outright, copyright included'],
   ['MUSIC', 'description', 'chose to invest in his own music.', 'chose to invest in his own music. Twelve tracks, featuring Paul Mugarura and Peter Basaza. [CONFIRM YEAR: the album files say 2001, the memoir says 2002]']
 ];
+// Tabs whose rows are swapped for the new seed, but only if every row still has one of these old default names
+var REPLACE_IF_DEFAULT = { SERVICES: ['service', ['Music production', 'Recording', 'Mixing & mastering', 'Live sound', 'Songwriting & arranging']] };
 // Cells filled from the seed when they are still empty in the Sheet (never overwrites your text)
 var FILL_FIELDS = { MUSIC: ['id', ['audio_url']] };
 function syncSeedToSheet() {
@@ -368,8 +373,23 @@ function syncSeedToSheet() {
     });
   });
 
+  // 1a. Create any new tabs (e.g. PRICING, UPRS_WORKS) with their starting content
+  var missing = Object.keys(SCHEMA).filter(function (n) { return !ss.getSheetByName(n); });
+  if (missing.length) { setupPortfolio(); log.push('New tabs created: ' + missing.join(', ')); }
+
+  // 1b. Replace tabs that still hold only the old default rows
+  Object.keys(REPLACE_IF_DEFAULT).forEach(function (name) {
+    var k = REPLACE_IF_DEFAULT[name][0], olds = REPLACE_IF_DEFAULT[name][1], sh = ss.getSheetByName(name);
+    var cur = rows(name);
+    if (!cur.length || !cur.every(function (r) { return olds.indexOf(String(r[k])) > -1; })) return;
+    if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).clearContent();
+    var vals = seed[name].map(function (o) { return SCHEMA[name].map(function (h) { return o[h] === undefined ? '' : o[h]; }); });
+    sh.getRange(2, 1, vals.length, SCHEMA[name].length).setValues(vals);
+    log.push(name + ': replaced with the new list (' + vals.length + ' rows)');
+  });
+
   // 2. Append rows that are new in the seed
-  var keyOf = { PHOTOS: 'image', EVENTS: 'title', MILESTONES: 'title', BANDS: 'name', ARTISTS: 'name', MUSIC: 'id', PEOPLE: 'name', PROJECTS: 'title', SERVICES: 'service', SKILLS: 'skill' };
+  var keyOf = { PROFILE: 'key', PHOTOS: 'image', EVENTS: 'title', MILESTONES: 'title', BANDS: 'name', ARTISTS: 'name', MUSIC: 'id', PEOPLE: 'name', PROJECTS: 'title', SERVICES: 'service', SKILLS: 'skill' };
   Object.keys(keyOf).forEach(function (name) {
     var sh = ss.getSheetByName(name), k = keyOf[name];
     var have = rows(name).map(function (r) { return String(r[k]); });

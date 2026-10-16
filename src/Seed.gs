@@ -16,6 +16,8 @@ function getSeed_() {
   return {
 
     PROFILE: [
+      { key: 'pricing_note', value: 'Prices in Uganda shillings, with US dollar prices for clients abroad. “From” prices depend on the size of the job — you get a firm quote before any work starts.', status: 'confirmed' },
+      { key: 'booking_terms', value: '50% deposit to book · Balance on delivery · Mobile Money or bank transfer · Discounts for albums, churches and choirs', status: 'confirmed' },
       { key: 'full_name', value: 'Victor Unyuthfua Uringtho', status: 'confirmed' },
       { key: 'display_name', value: 'Victor Uringtho', status: 'confirmed' },
       { key: 'name_meaning', value: 'Unyuthfua means “Show us our home” in the Alur language.', status: 'confirmed' },
@@ -203,11 +205,10 @@ function getSeed_() {
     ],
 
     SERVICES: [
-      { order: 1, service: 'Music production', description: 'From idea to finished record — arrangement, soundtracks and production.', visible: T, status: 'confirmed' },
-      { order: 2, service: 'Recording', description: 'Vocals, instruments, bands and choirs.', visible: T, status: 'confirmed' },
-      { order: 3, service: 'Mixing & mastering', description: 'Including remote work — send your stems from anywhere.', visible: T, status: 'confirmed' },
-      { order: 4, service: 'Live sound', description: 'Front-of-house mixing and live recording for bands and events.', visible: T, status: 'confirmed' },
-      { order: 5, service: 'Songwriting & arranging', description: 'Writing and arranging for artists, bands and choirs.', visible: T, status: 'confirmed' }
+      { order: 1, service: 'Studio recording', description: 'Vocals, instruments, bands and choirs, recorded in Victor’s studio by a producer and engineer who has been doing it since the four-track days.', visible: T, status: 'confirmed' },
+      { order: 2, service: 'Live performance recording', description: 'Your concert, service or event captured as it happens — and live sound mixing at the desk for bands and events.', visible: T, status: 'confirmed' },
+      { order: 3, service: 'Mixing & mastering', description: 'Send your stems or your studio mix from anywhere in the world. Artists already send Victor jobs online — one came all the way from Dubai.\n• Send your stems or studio mix online\n• Victor mixes and masters the track\n• The finished track is sent back to you', visible: T, status: 'confirmed' },
+      { order: 4, service: 'Soundtracks & beats', description: 'Original soundtracks and jingles made to order. Or take one of Victor’s beats — license it, make it exclusive, or buy it outright with the copyright.\n• Commission an original soundtrack or jingle\n• License a beat (basic or exclusive)\n• Buy a beat outright, copyright included', visible: T, status: 'confirmed' }
     ],
 
     SOCIAL_LINKS: [
@@ -217,6 +218,44 @@ function getSeed_() {
       { order: 4, platform: 'Facebook', url: '[ADD FACEBOOK LINK]', label: 'Facebook', visible: T, status: 'placeholder' },
       { order: 5, platform: 'TikTok', url: '[ADD TIKTOK LINK]', label: 'TikTok', visible: T, status: 'placeholder' },
       { order: 6, platform: 'SoundCloud', url: '[ADD SOUNDCLOUD LINK]', label: 'SoundCloud', visible: T, status: 'placeholder' }
+    ],
+
+
+    // Prices are in whole Uganda shillings and US dollars. prefix 'from' = starting price.
+    PRICING: [
+      { order: 1, service: 'Studio recording', item: 'Recording session', prefix: '', price_ugx: 60000, price_usd: 20, unit: 'per hour', details: 'Minimum 2 hours. Engineer included.', highlight: false, visible: T, status: 'confirmed' },
+      { order: 2, service: 'Studio recording', item: 'Full day in the studio (8 hours)', prefix: '', price_ugx: 400000, price_usd: 120, unit: 'per day', details: '', highlight: false, visible: T, status: 'confirmed' },
+      { order: 3, service: 'Studio recording', item: 'Vocals on your beat, mixed & mastered', prefix: '', price_ugx: 450000, price_usd: 140, unit: 'per song', details: '', highlight: false, visible: T, status: 'confirmed' },
+      { order: 4, service: 'Studio recording', item: 'Full song production', prefix: 'from', price_ugx: 1200000, price_usd: 350, unit: 'per song', details: 'Beat, recording, mixing and mastering.', highlight: true, visible: T, status: 'confirmed' },
+      { order: 5, service: 'Studio recording', item: 'Band or choir session (half day)', prefix: 'from', price_ugx: 600000, price_usd: 180, unit: 'per session', details: '', highlight: false, visible: T, status: 'confirmed' },
+      { order: 6, service: 'Live performance recording', item: 'Live multitrack recording + stereo mix', prefix: 'from', price_ugx: 900000, price_usd: 260, unit: 'per event', details: 'Up to 4 hours.', highlight: false, visible: T, status: 'confirmed' },
+      { order: 7, service: 'Live performance recording', item: 'Live sound engineer at the desk', prefix: 'from', price_ugx: 400000, price_usd: 120, unit: 'per event', details: 'Using the venue’s sound system.', highlight: false, visible: T, status: 'confirmed' },
+      { order: 8, service: 'Live performance recording', item: 'Live album or EP from your event', prefix: 'from', price_ugx: 2500000, price_usd: 700, unit: 'per project', details: 'Recorded, mixed and mastered.', highlight: true, visible: T, status: 'confirmed' },
+      { order: 9, service: 'Mixing & mastering', item: 'Mix & master', prefix: '', price_ugx: 450000, price_usd: 140, unit: 'per song', details: 'Two rounds of changes included.', highlight: true, visible: T, status: 'confirmed' },
+      { order: 10, service: 'Mixing & mastering', item: 'Mixing only', prefix: '', price_ugx: 350000, price_usd: 110, unit: 'per song', details: '', highlight: false, visible: T, status: 'confirmed' },
+      { order: 11, service: 'Mixing & mastering', item: 'Mastering only', prefix: '', price_ugx: 120000, price_usd: 40, unit: 'per song', details: '', highlight: false, visible: T, status: 'confirmed' },
+      { order: 12, service: 'Mixing & mastering', item: 'EP mastering (up to 5 songs)', prefix: '', price_ugx: 500000, price_usd: 160, unit: 'per EP', details: '', highlight: false, visible: T, status: 'confirmed' },
+      { order: 13, service: 'Soundtracks & beats', item: 'Jingle or short soundtrack (up to 60 sec)', prefix: 'from', price_ugx: 800000, price_usd: 250, unit: 'per piece', details: 'Licensed for one project.', highlight: false, visible: T, status: 'confirmed' },
+      { order: 14, service: 'Soundtracks & beats', item: 'Film, documentary or theatre score', prefix: 'from', price_ugx: 3000000, price_usd: 900, unit: 'per project', details: 'Full rights buyout: double the fee.', highlight: false, visible: T, status: 'confirmed' },
+      { order: 20, service: 'Beat licences', item: 'Basic licence', prefix: '', price_ugx: 200000, price_usd: 55, unit: 'per beat', details: 'Non-exclusive — the beat stays on sale to others\n• MP3 and WAV files\n• Up to 100,000 streams or sales\n• One music video\n• Credit: “Prod. by Victor Uringtho”\n• Victor keeps the copyright and his writer’s share', highlight: false, visible: T, status: 'confirmed' },
+      { order: 21, service: 'Beat licences', item: 'Exclusive licence', prefix: '', price_ugx: 1500000, price_usd: 420, unit: 'per beat', details: 'The beat is yours alone — taken off sale\n• WAV and stems (track-outs)\n• Unlimited streams, sales and videos\n• Credit: “Prod. by Victor Uringtho”\n• Victor keeps the copyright and his writer’s share, registered with UPRS', highlight: true, visible: T, status: 'confirmed' },
+      { order: 22, service: 'Beat licences', item: 'Full buyout', prefix: '', price_ugx: 4500000, price_usd: 1250, unit: 'per beat', details: 'You own it outright — for labels, brands, adverts and film\n• Everything in the Exclusive licence\n• Copyright transferred to you in writing\n• Victor keeps only the right to be credited', highlight: false, visible: T, status: 'confirmed' }
+    ],
+
+    // PRIVATE — never shown on the website. Victor's works list for UPRS registration.
+    UPRS_WORKS: [
+      { order: 1, title: 'Sirina Kirala', album: 'Thank You Lord', year: '2001', duration: '4:38', writers_composers: 'Victor Uringtho [CONFIRM CO-WRITERS]', splits: '[CONFIRM SPLITS]', performers: 'Victor Uringtho', isrc: '', uprs_status: 'To register', notes: '' },
+      { order: 2, title: 'Thank You Lord', album: 'Thank You Lord', year: '2001', duration: '5:57', writers_composers: 'Victor Uringtho [CONFIRM CO-WRITERS]', splits: '[CONFIRM SPLITS]', performers: 'Victor Uringtho', isrc: '', uprs_status: 'To register', notes: '' },
+      { order: 3, title: 'Best Friend', album: 'Thank You Lord', year: '2001', duration: '5:31', writers_composers: 'Victor Uringtho [CONFIRM CO-WRITERS]', splits: '[CONFIRM SPLITS]', performers: 'Victor Uringtho', isrc: '', uprs_status: 'To register', notes: '' },
+      { order: 4, title: 'Redeemer 2', album: 'Thank You Lord', year: '2006', duration: '5:26', writers_composers: 'Victor Uringtho [CONFIRM CO-WRITERS]', splits: '[CONFIRM SPLITS]', performers: 'Victor Uringtho', isrc: '', uprs_status: 'To register', notes: 'File dated 2006 — confirm year and whether it is a later version.' },
+      { order: 5, title: 'I’ve Found a Friend', album: 'Thank You Lord', year: '2001', duration: '3:43', writers_composers: 'Victor Uringtho [CONFIRM CO-WRITERS]', splits: '[CONFIRM SPLITS]', performers: 'Victor Uringtho', isrc: '', uprs_status: 'To register', notes: '' },
+      { order: 6, title: 'Holy Holy', album: 'Thank You Lord', year: '2001', duration: '4:33', writers_composers: 'Victor Uringtho [CONFIRM CO-WRITERS]', splits: '[CONFIRM SPLITS]', performers: 'Victor Uringtho', isrc: '', uprs_status: 'To register', notes: '' },
+      { order: 7, title: 'Love the Way', album: 'Thank You Lord', year: '2001', duration: '4:38', writers_composers: 'Victor Uringtho [CONFIRM CO-WRITERS]', splits: '[CONFIRM SPLITS]', performers: 'Victor Uringtho ft. Paul Mugarura', isrc: '', uprs_status: 'To register', notes: 'Featured artist — agree splits in writing.' },
+      { order: 8, title: 'Looks Right', album: 'Thank You Lord', year: '2001', duration: '4:30', writers_composers: 'Victor Uringtho [CONFIRM CO-WRITERS]', splits: '[CONFIRM SPLITS]', performers: 'Victor Uringtho', isrc: '', uprs_status: 'To register', notes: '' },
+      { order: 9, title: 'I Surrender', album: 'Thank You Lord', year: '2001', duration: '4:07', writers_composers: 'Victor Uringtho [CONFIRM CO-WRITERS]', splits: '[CONFIRM SPLITS]', performers: 'Victor Uringtho', isrc: '', uprs_status: 'To register', notes: '' },
+      { order: 10, title: 'Muvubuka', album: 'Thank You Lord', year: '2001', duration: '3:46', writers_composers: 'Victor Uringtho [CONFIRM CO-WRITERS]', splits: '[CONFIRM SPLITS]', performers: 'Victor Uringtho', isrc: '', uprs_status: 'To register', notes: '' },
+      { order: 11, title: 'Generation', album: 'Thank You Lord', year: '2001', duration: '5:14', writers_composers: 'Victor Uringtho [CONFIRM CO-WRITERS]', splits: '[CONFIRM SPLITS]', performers: 'Victor Uringtho ft. Peter Basaza & Paul Mugarura', isrc: '', uprs_status: 'To register', notes: 'Featured artists — agree splits in writing.' },
+      { order: 12, title: 'Instrumental Interlude', album: 'Thank You Lord', year: '2001', duration: '4:11', writers_composers: 'Victor Uringtho', splits: 'Victor Uringtho 100% [CONFIRM]', performers: 'Victor Uringtho', isrc: '', uprs_status: 'To register', notes: 'Instrumental.' }
     ],
 
     ENQUIRIES: []
