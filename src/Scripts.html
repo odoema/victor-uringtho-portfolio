@@ -45,6 +45,36 @@
     return v;
   }
 
+  /* ---------------- talking to the Sheet (Apps Script page or GitHub Pages) ---------------- */
+  function gsr() { return window.google && google.script && google.script.run; }
+  function apiUrl() { return window.VU_API ? String(window.VU_API).split('?')[0] : ''; }
+  /** Request with a reply (sign-ups, enquiries). done(null) means "could not reach the Sheet". */
+  function api(payload, done) {
+    done = done || function () {};
+    if (gsr()) { google.script.run.withSuccessHandler(done).withFailureHandler(function () { done(null); }).siteAction(payload); return; }
+    if (!apiUrl()) { done(null); return; }
+    fetch(apiUrl(), { method: 'POST', body: JSON.stringify(payload) })
+      .then(function (r) { return r.json(); }).then(done).catch(function () { done(null); });
+  }
+  /** Fire-and-forget (visit and click counts). */
+  function beacon(payload) {
+    if (PREVIEW) return;
+    if (gsr()) { try { google.script.run.siteAction(payload); } catch (e) {} return; }
+    var u = apiUrl(), body = JSON.stringify(payload); if (!u) return;
+    try { if (navigator.sendBeacon && navigator.sendBeacon(u, new Blob([body], { type: 'text/plain' }))) return; } catch (e) {}
+    try { fetch(u, { method: 'POST', mode: 'no-cors', keepalive: true, body: body }); } catch (e) {}
+  }
+  function trafficSource() {
+    var q = location.search, r = document.referrer || '';
+    if (/utm_source=/.test(q) || /facebook|fb\.|whatsapp|wa\.me|tiktok|instagram|t\.co|twitter|x\.com|youtube|linkedin/i.test(r)) return 'social';
+    if (/google\.|bing\.|yahoo\.|duckduckgo|ecosia/i.test(r)) return 'search';
+    return 'other';
+  }
+  function trackVisit() {
+    try { if (sessionStorage.getItem('vu_seen')) return; sessionStorage.setItem('vu_seen', '1'); } catch (e) {}
+    beacon({ a: 'hit', src: trafficSource() });
+  }
+
   /* ---------------- players (lazy — nothing loads until tapped) ---------------- */
   function spotifyEmbed(url) {
     var m = String(url || '').match(/open\.spotify\.com\/(?:intl-[a-z]+\/)?(album|track|playlist|artist|episode|show)\/([A-Za-z0-9]+)/);
@@ -394,7 +424,7 @@
     // Enquiry form follows the services list, and each card pre-selects its service
     var sel = $('#enquiryType');
     if (sel) {
-      sel.innerHTML = items.map(function (s) { return '<option>' + esc(s.service) + '</option>'; }).join('') + '<option>Podcast — guest or sponsor</option><option>Collaboration</option><option>Other</option>';
+      sel.innerHTML = items.map(function (s) { return '<option>' + esc(s.service) + '</option>'; }).join('') + (has(P.fridays_title) ? '<option>' + esc(FRI_LABEL) + '</option>' : '') + (priceRows(ADV).length ? '<option>' + esc(ADV) + '</option>' : '') + '<option>Podcast — guest or sponsor</option><option>Collaboration</option><option>Other</option>';
       if (!host._wired) $('#services').addEventListener('click', function (e) {
         var a = e.target.closest('.offer-cta'); if (!a) return;
         sel.value = a.getAttribute('data-service');
@@ -414,6 +444,83 @@
     }
     var cs = $('#contactServices'); if (cs) cs.textContent = items.map(function (s) { return s.service; }).join(' · ');
     renderLicences();
+  }
+
+  /* Friday Gospel Music — PROFILE keys fridays_* (the section hides itself without fridays_title) */
+  var FRI_LABEL = 'Friends of Victor — Friday Gospel';
+  function renderFridays() {
+    var sec = $('#fridays'); if (!sec) return;
+    if (!has(P.fridays_title)) { sec.hidden = true; return; }
+    sec.hidden = false;
+    if (has(P.fridays_series)) $('#friSeries').textContent = P.fridays_series;
+    $('#fridaysTitle').innerHTML = t(P.fridays_title);
+    $('#friPitch').innerHTML = t(P.fridays_pitch || '');
+    var st = $('#friStatus'); if (has(P.fridays_status)) { st.textContent = P.fridays_status; st.hidden = false; }
+    var sp = list('SPONSORS').filter(function (s) { return s.slot === 'fridays'; })[0], by = $('#friBy');
+    if (by) by.innerHTML = sp ? 'Presented by ' + sponsorLink(sp, true) :
+      (priceRows('Advertising & sponsorship').length ? 'Presenting sponsor wanted · <a href="#partners">see the rates</a>' : '');
+    var facts = [['When', P.fridays_when], ['Where', P.fridays_where], ['Served', P.fridays_menu], ['Always', P.fridays_rule]].filter(function (f) { return has(f[1]); });
+    $('#friFacts').innerHTML = facts.map(function (f) { return '<div><dt>' + f[0] + '</dt><dd>' + t(f[1]) + '</dd></div>'; }).join('');
+    if (!sec._wired) {
+      sec._wired = true;
+      sec.addEventListener('click', function (e) {
+        var a = e.target.closest('[data-fri]'), sel = $('#enquiryType'); if (!a || !sel) return;
+        sel.value = FRI_LABEL;
+        var msg = $('#enquiryForm textarea'); if (msg && !msg.value.trim()) msg.value = a.getAttribute('data-fri') + '\n\n';
+        setTimeout(function () { var m = $('#enquiryForm textarea'); if (m) m.focus({ preventScroll: true }); }, 600);
+      });
+    }
+  }
+
+  /* Sponsors (SPONSORS tab: slot = strip | fridays | podcast) and the advertising rate card */
+  var ADV = 'Advertising & sponsorship';
+  function sponsorLink(s, textOnly) {
+    var logo = !textOnly && img(s.logo, 400);
+    var inner = logo ? '<img src="' + logo + '" alt="' + esc(s.name) + '" loading="lazy">' : '<span>' + t(s.name) + '</span>';
+    if (!textOnly && has(s.tagline)) inner += '<small>' + t(s.tagline) + '</small>';
+    return has(s.link) && !isPh(s.link) ? '<a href="' + esc(s.link) + '" target="_blank" rel="noopener sponsored" data-sp="' + esc(s.name) + '">' + inner + '</a>' : inner;
+  }
+  function renderPartners() {
+    var sec = $('#partners'); if (!sec) return;
+    var rates = priceRows(ADV), strip = list('SPONSORS').filter(function (s) { return !has(s.slot) || s.slot === 'strip'; });
+    if (!rates.length && !strip.length) { sec.hidden = true; return; }
+    $('#partnerStrip').innerHTML = '<span class="meta">Partners</span>' + (strip.length ? strip.map(function (s) { return '<div class="partner">' + sponsorLink(s) + '</div>'; }).join('') :
+      '<a class="partner partner-open" href="#partners">Your brand here</a>');
+    $('#partnersTitle').textContent = P.advertise_title || 'Advertise with Victor';
+    $('#advPitch').innerHTML = t(P.advertise_pitch || '');
+    $('#advRates').innerHTML = priceList(ADV);
+    if (!rates.length) $('.adv', sec).hidden = true;
+    if (!sec._wired) {
+      sec._wired = true;
+      document.addEventListener('click', function (e) {
+        var s = e.target.closest('[data-sp]'); if (s) beacon({ a: 'click', name: s.getAttribute('data-sp') });
+        var a = e.target.closest('[data-adv]'), sel = $('#enquiryType'); if (!a || !sel) return;
+        sel.value = ADV;
+        var msg = $('#enquiryForm textarea'); if (msg && !msg.value.trim()) msg.value = a.getAttribute('data-adv') + '\n\n';
+      });
+    }
+  }
+
+  /* Friends of Victor list (FANS tab, private) */
+  function initJoin() {
+    var form = $('#joinForm'); if (!form) return;
+    if (has(P.join_title)) $('#joinTitle').textContent = P.join_title;
+    if (has(P.join_pitch)) $('#joinPitch').textContent = P.join_pitch;
+    var status = $('#joinStatus');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var F = form.elements, name = F.namedItem('name').value.trim(), contact = F.namedItem('contact').value.trim();
+      var ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contact) || contact.replace(/[^\d]/g, '').length >= 9;
+      if (!name || !ok) { status.textContent = 'Please add your name and a WhatsApp number or email.'; return; }
+      var ints = $$('input[name="interests"]:checked', form).map(function (i) { return i.value; }).join(', ');
+      var src = (location.search.match(/utm_source=([^&]+)/) || [])[1] || trafficSource();
+      var btn = form.querySelector('button'); btn.disabled = true; status.textContent = 'Adding you…';
+      api({ a: 'join', name: name, contact: contact, interests: ints, source: decodeURIComponent(src), website: F.namedItem('website').value }, function (r) {
+        btn.disabled = false;
+        if (r && r.ok) { form.reset(); status.textContent = r.already ? 'You’re already on the list. See you on Friday!' : 'Welcome to Friends of Victor! We’ll be in touch.'; }
+        else status.textContent = (r && r.error) || 'We couldn’t reach the list just now. Please try again in a minute.';
+      });
+    });
   }
 
   var PHOTOS = [];
@@ -478,8 +585,19 @@
       e.preventDefault();
       var data = {}; new FormData(form).forEach(function (v, k) { data[k] = v; });
       if (!data.name || !data.message || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)) { status.textContent = 'Please add your name, a valid email and a message.'; return; }
-      if (!(window.google && google.script && google.script.run)) {
-        // Static hosting (GitHub Pages / custom domain): hand the enquiry to the visitor's email app
+      if (!gsr()) {
+        // Static hosting (GitHub Pages): save to the Sheet through the web app; if that fails, use the visitor's email app
+        var sbtn = form.querySelector('button'); sbtn.disabled = true; status.textContent = 'Sending…';
+        data.a = 'enquiry';
+        api(data, function (r) {
+          sbtn.disabled = false;
+          if (r && r.ok) { form.reset(); status.textContent = 'Thank you — your message has been received.'; return; }
+          if (r && r.error) { status.textContent = r.error; return; }
+          mailtoFallback();
+        });
+        return;
+      }
+      function mailtoFallback() {
         if (has(P.email) && !isPh(P.email)) {
           location.href = 'mailto:' + P.email + '?subject=' + encodeURIComponent('Website enquiry (' + (data.type || 'General') + ') — ' + data.name) +
             '&body=' + encodeURIComponent(data.message + '\n\n— ' + data.name + ' <' + data.email + '>');
@@ -487,7 +605,6 @@
         } else {
           status.textContent = 'Online enquiries open soon — please use the links above to reach Victor.';
         }
-        return;
       }
       var btn = form.querySelector('button'); btn.disabled = true; status.textContent = 'Sending…';
       google.script.run.withSuccessHandler(function (r) {
@@ -542,6 +659,7 @@
     list('PEOPLE').forEach(function (p) { add('Person', p.name, p.relationship + ' ' + p.contribution, '#people'); });
     list('SKILLS').forEach(function (s) { add('Skill', s.skill, s.group + ' ' + s.evidence, '#craft'); });
     list('SERVICES').forEach(function (s) { add('Service', s.service, s.description, '#svc-' + slug(s.service)); });
+    if (has(P.fridays_title)) add('Event', P.fridays_title, [P.fridays_series, 'friday weekly gospel worship', P.fridays_where, P.fridays_menu].join(' '), '#fridays');
   }
   function initSearch() {
     buildIndex();
@@ -691,7 +809,7 @@
 
     // Bottom tab bar: highlight the current section
     var tabs = $$('.tabbar a');
-    var ids = { home: '', story: 'story', people: 'story', music: 'music', services: 'services', artists: 'story', bands: 'story', craft: 'story',
+    var ids = { home: '', story: 'story', people: 'story', music: 'music', services: 'services', fridays: 'services', partners: 'contact', artists: 'story', bands: 'story', craft: 'story',
                 events: 'story', milestones: 'story', next: 'contact', legacy: 'contact', contact: 'contact' };
     var spy = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
@@ -706,8 +824,8 @@
 
   /* ================= BOOT ================= */
   function boot() {
-    [renderHero, renderStats, renderChapters, renderPeople, renderMusic, renderServices, renderArtists, renderBands,
-     renderSkills, renderEvents, renderTimeline, renderProjects, renderContact,
+    [renderHero, renderStats, renderChapters, renderPeople, renderMusic, renderServices, renderFridays, renderArtists, renderBands,
+     renderSkills, renderEvents, renderTimeline, renderProjects, renderPartners, renderContact, initJoin, trackVisit,
      initNav, initReveal, initLightbox, initSearch, initStrings, initMobile].forEach(function (fn) {
       try { fn(); } catch (err) { console.error(fn.name, err); }   // one bad row never blanks the whole site
     });

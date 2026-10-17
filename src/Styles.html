@@ -302,6 +302,54 @@ p{margin:0 0 var(--s3)}
 .svc-poster figcaption #svcPosterCap{font:italic 400 1rem var(--f-display);letter-spacing:0;color:var(--paper-2)}
 .svc-poster figcaption a{color:var(--brass-2);text-decoration:none}
 @media (max-width:900px){.svc-intro{grid-template-columns:1fr}.svc-poster{max-width:520px}.svc-poster > a{transform:none}}
+
+/* Friday Gospel Music — Friends of Victor */
+.fridays{background:radial-gradient(120% 90% at 85% 0%,rgba(201,141,75,.20),transparent 60%),var(--ink)}
+.fri-card{display:grid;grid-template-columns:1.25fr 1fr;gap:var(--s5);align-items:center;padding:var(--s5);border:1px solid var(--line-2);border-radius:calc(var(--r) * 1.4);
+  background:linear-gradient(160deg,rgba(38,32,27,.92),rgba(20,17,15,.92));box-shadow:0 30px 80px -40px rgba(0,0,0,.8)}
+.fri-main h2{margin:.4rem 0 .2rem}
+.fri-status{display:inline-block;margin:.6rem 0 .2rem;padding:.3rem .8rem;border-radius:999px;background:rgba(201,141,75,.16);border:1px solid rgba(228,181,127,.45);
+  color:var(--brass-2);font:500 .72rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase}
+.fri-main .lede{margin-top:.8rem}
+.fri-cta{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:var(--s4)}
+.fri-facts{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin:0;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.fri-facts div{padding:1.1rem 1.2rem;background:var(--ink-2)}
+.fri-facts dt{font:500 .64rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--brass-2);margin-bottom:.35rem}
+.fri-facts dd{margin:0;color:var(--paper);font-size:.98rem;line-height:1.45}
+.fri-by{margin:.5rem 0 0;color:var(--muted);font-size:.86rem}
+.fri-by:empty{display:none}
+.fri-by a{color:var(--brass-2)}
+/* Join Friends of Victor */
+.join{display:grid;grid-template-columns:1fr 1.4fr;gap:var(--s4) var(--s5);margin-top:var(--s4);padding:var(--s4) var(--s5);border:1px dashed var(--line-2);border-radius:var(--r)}
+.join h3{margin-bottom:.4rem}
+.join-fields{display:grid;grid-template-columns:1fr 1fr;gap:.8rem 1rem;align-items:end}
+.join-fields > label{display:flex;flex-direction:column;gap:.35rem;font-size:.8rem;color:var(--paper-2)}
+.join-fields input:not([type=checkbox]){padding:.75rem .9rem;border-radius:var(--r-sm);border:1px solid var(--line-2);background:var(--ink-2);color:var(--paper);font:inherit;font-size:.95rem;min-height:46px}
+.join-fields input:focus{border-color:var(--brass-2);outline:none}
+.join-int{grid-column:1/-1;border:0;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.5rem}
+.join-int legend{font-size:.8rem;color:var(--paper-2);margin-bottom:.4rem;padding:0}
+.join-int label{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .8rem;border:1px solid var(--line-2);border-radius:999px;font-size:.84rem;cursor:pointer;min-height:38px}
+.join-int label:has(input:checked){border-color:var(--brass-2);color:var(--brass-2)}
+.join-int input{accent-color:var(--brass)}
+.join-fields .btn{justify-content:center}
+.join-fields .form-status{grid-column:1/-1;margin:0;min-height:1.2em;font-size:.86rem;color:var(--brass-2)}
+.join .hp{position:absolute;left:-9999px}
+/* Partners & advertising */
+.partners{background:var(--ink)}
+.partner-strip{display:flex;flex-wrap:wrap;align-items:center;gap:.8rem 1.4rem;padding:1rem 1.2rem;margin-bottom:var(--s5);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.partner-strip .meta{color:var(--muted)}
+.partner a,.partner > span,.partner-open{display:flex;flex-direction:column;text-decoration:none;color:var(--paper);font:500 1rem var(--f-display)}
+.partner img{max-height:44px;width:auto;filter:grayscale(1) brightness(1.6);opacity:.85;transition:filter .3s,opacity .3s}
+.partner a:hover img{filter:none;opacity:1}
+.partner small{font:400 .72rem var(--f-body);color:var(--muted)}
+.partner-open{padding:.45rem 1rem;border:1px dashed var(--line-2);border-radius:999px;font:500 .84rem var(--f-body);color:var(--brass-2)}
+.adv{display:grid;grid-template-columns:1fr 1.2fr;gap:var(--s3) var(--s5);align-items:start}
+.adv .section-head{margin-bottom:0}
+.adv-rates .prices{margin-top:0}
+.adv-cta{grid-column:2;justify-self:start}
+@media (max-width:900px){.fri-card{grid-template-columns:1fr;padding:var(--s4)}.join{grid-template-columns:1fr;padding:var(--s4)}.adv{grid-template-columns:1fr}.adv-cta{grid-column:1}}
+@media (max-width:560px){.join-fields{grid-template-columns:1fr}}
+@media (max-width:480px){.fri-facts{grid-template-columns:1fr}.fri-cta .btn{flex:1 1 100%;justify-content:center}}
 .cur-toggle{display:inline-flex;margin-top:var(--s3);border:1px solid var(--line-2);border-radius:999px;padding:3px}
 .cur-toggle button{background:none;border:0;color:var(--muted);font:500 .72rem var(--f-mono);letter-spacing:.1em;padding:.45rem .9rem;border-radius:999px;cursor:pointer;min-height:36px}
 .cur-toggle button[aria-pressed="true"]{background:var(--brass);color:var(--ink)}
