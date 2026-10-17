@@ -410,7 +410,7 @@ function syncSeedToSheet() {
   });
 
   // 2. Append rows that are new in the seed
-  var keyOf = { PROFILE: 'key', PHOTOS: 'image', EVENTS: 'title', MILESTONES: 'title', BANDS: 'name', ARTISTS: 'name', MUSIC: 'id', PEOPLE: 'name', PROJECTS: 'title', SERVICES: 'service', SKILLS: 'skill' };
+  var keyOf = { PROFILE: 'key', PRICING: 'item', PHOTOS: 'image', EVENTS: 'title', MILESTONES: 'title', BANDS: 'name', ARTISTS: 'name', MUSIC: 'id', PEOPLE: 'name', PROJECTS: 'title', SERVICES: 'service', SKILLS: 'skill' };
   Object.keys(keyOf).forEach(function (name) {
     var sh = ss.getSheetByName(name), k = keyOf[name];
     var have = rows(name).map(function (r) { return String(r[k]); });

@@ -276,7 +276,7 @@ p{margin:0 0 var(--s3)}
 .skill-name::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--brass);box-shadow:0 0 10px var(--brass)}
 .skill-ev{font-size:.84rem;color:var(--muted);margin:.15rem 0 0 1.1rem}
 /* ---------- Services (Work with Victor) ---------- */
-.offers{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:var(--s3);counter-reset:offer}
+.offers{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:var(--s3);counter-reset:offer}
 .offer{position:relative;display:flex;flex-direction:column;gap:.6rem;padding:var(--s5) var(--s4) var(--s4);background:var(--ink);border:1px solid var(--line);
   border-top:2px solid var(--brass);border-radius:0 0 var(--r) var(--r);overflow:hidden;transition:border-color .3s,transform .45s var(--ease)}
 .offer:hover{border-color:var(--line-2);border-top-color:var(--brass-2);transform:translateY(-4px)}

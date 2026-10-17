@@ -394,7 +394,7 @@
     // Enquiry form follows the services list, and each card pre-selects its service
     var sel = $('#enquiryType');
     if (sel) {
-      sel.innerHTML = items.map(function (s) { return '<option>' + esc(s.service) + '</option>'; }).join('') + '<option>Collaboration</option><option>Other</option>';
+      sel.innerHTML = items.map(function (s) { return '<option>' + esc(s.service) + '</option>'; }).join('') + '<option>Podcast — guest or sponsor</option><option>Collaboration</option><option>Other</option>';
       if (!host._wired) $('#services').addEventListener('click', function (e) {
         var a = e.target.closest('.offer-cta'); if (!a) return;
         sel.value = a.getAttribute('data-service');
