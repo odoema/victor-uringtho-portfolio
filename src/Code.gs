@@ -59,7 +59,8 @@ var SCHEMA = {
 
 // never sent to the browser
 var PRIVATE_SHEETS = { ENQUIRIES: true, UPRS_WORKS: true, FANS: true, STATS: true, WEEKLY_POSTS: true, VISITS: true };
-var SITE_URL = 'https://odoema.github.io/victor-uringtho-portfolio/';
+var SITE_URL = 'https://victoruringtho.com/';
+var OLD_SITE_URL = 'https://odoema.github.io/victor-uringtho-portfolio/';
 
 /* ===========================================================================
  *  WEB APP
@@ -82,7 +83,7 @@ function doGet(e) {
 
   return t.evaluate()
     .setTitle(CONFIG.SITE_TITLE)
-    .setFaviconUrl('https://odoema.github.io/victor-uringtho-portfolio/assets/brand/favicon-32.png')
+    .setFaviconUrl('https://victoruringtho.com/assets/brand/favicon-32.png')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL); // allows embedding in Google Sites
 }
@@ -748,6 +749,13 @@ function syncSeedToSheet() {
       var v = String(r[f[1]] || '');
       if (v.indexOf(f[2]) > -1 && v.indexOf(f[3]) === -1) { sh.getRange(i + 2, c).setValue(v.split(f[2]).join(f[3])); log.push(f[0] + ' row ' + (i + 2) + ': wording fix'); }
     });
+  });
+
+  // 4b. Move every link from the old github.io address to the website's own domain
+  Object.keys(SCHEMA).forEach(function (name) {
+    var sh = ss.getSheetByName(name); if (!sh || sh.getLastRow() < 2) return;
+    var n = sh.createTextFinder(OLD_SITE_URL).replaceAllWith(SITE_URL);
+    if (n) log.push(name + ': ' + n + ' links moved to ' + SITE_URL);
   });
 
   // 5. Re-number rows (only rows still on their old default order)
