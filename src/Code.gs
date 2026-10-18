@@ -20,10 +20,10 @@
  */
 
 var CONFIG = {
-  SITE_TITLE: 'Victor Uringtho — Unyuthfua: Show Us Our Home',
+  SITE_TITLE: 'Victor Uringtho — Gospel Music Producer & Sound Engineer, Kampala, Uganda',
   SITE_DESCRIPTION:
-    'Ugandan music producer, songwriter, arranger, recording & mixing engineer and live sound engineer. ' +
-    'A journey of faith, passion and music that began with a homemade guitar.',
+    'Ugandan music producer, songwriter and sound engineer in Kampala. Studio recording, mixing & mastering, ' +
+    'live sound, beats, music training and Friday Gospel Music.',
   CACHE_KEY: 'vu_portfolio_v1',
   CACHE_SECONDS: 600,            // 10 minutes; "Publish changes" clears it instantly
   PLACEHOLDER_RE: /\[(ADD|CONFIRM)[^\]]*\]/i
@@ -53,11 +53,12 @@ var SCHEMA = {
   ENQUIRIES:    ['timestamp', 'name', 'email', 'enquiry_type', 'message'],
   FANS:         ['timestamp', 'name', 'contact', 'interests', 'source'],
   STATS:        ['date', 'visits', 'from_social', 'from_search', 'from_other', 'sponsor_clicks', 'signups', 'enquiries'],
-  WEEKLY_POSTS: ['week_of', 'day', 'theme', 'post']
+  WEEKLY_POSTS: ['week_of', 'day', 'theme', 'post'],
+  VISITS:       ['time', 'source', 'came_from', 'landed_on', 'device', 'language', 'timezone']
 };
 
 // never sent to the browser
-var PRIVATE_SHEETS = { ENQUIRIES: true, UPRS_WORKS: true, FANS: true, STATS: true, WEEKLY_POSTS: true };
+var PRIVATE_SHEETS = { ENQUIRIES: true, UPRS_WORKS: true, FANS: true, STATS: true, WEEKLY_POSTS: true, VISITS: true };
 var SITE_URL = 'https://odoema.github.io/victor-uringtho-portfolio/';
 
 /* ===========================================================================
@@ -261,7 +262,7 @@ function doPost(e) {
 function siteAction(b) {
   b = b || {};
   try {
-    if (b.a === 'hit') { var src = { social: 'from_social', search: 'from_search' }[b.src] || 'from_other', o = { visits: 1 }; o[src] = 1; bump_(o); return { ok: true }; }
+    if (b.a === 'hit') { var src = { social: 'from_social', search: 'from_search' }[b.src] || 'from_other', o = { visits: 1 }; o[src] = 1; bump_(o); logVisit_(b); return { ok: true }; }
     if (b.a === 'click') { bump_({ sponsor_clicks: 1 }); return { ok: true }; }
     if (b.a === 'join') return joinFans_(b);
     if (b.a === 'enquiry') return submitEnquiry(b);
@@ -290,6 +291,40 @@ function joinFans_(f) {
   } finally { lock.releaseLock(); }
   bump_({ signups: 1 });
   return { ok: true };
+}
+
+/* ---------- Every visit: a row in VISITS and an instant email ---------- */
+var ALERT_TO = 'odoema@gmail.com';
+var ALERT_MAX_PER_DAY = 60;          // stays well inside Gmail's daily sending limit
+function logVisit_(b) {
+  var clip = function (v, n) { return String(v || '').replace(/[\r\n<>]/g, ' ').slice(0, n || 80); };
+  var srcName = { social: 'Social media / WhatsApp', search: 'Google or another search engine', other: 'Direct link or other' }[b.src] || 'Direct link or other';
+  var row = [new Date(), srcName + (b.utm ? ' (' + clip(b.utm, 30) + ')' : ''), clip(b.ref) || '—', clip(b.land) || 'Home',
+             clip(b.dev, 20) || '—', clip(b.lang, 20) || '—', clip(b.tz, 40) || '—'];
+  var ss = getSheet_(); if (!ss) return;
+  var sh = ss.getSheetByName('VISITS') || ss.insertSheet('VISITS');
+  if (sh.getLastRow() === 0) sh.appendRow(SCHEMA.VISITS);
+  sh.appendRow(row);
+  // instant email, capped per day
+  var props = PropertiesService.getScriptProperties(), tz = Session.getScriptTimeZone();
+  var day = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd'), k = 'ALERTS_' + day;
+  var sent = Number(props.getProperty(k) || 0);
+  var today = audience_(1).visits;
+  if (sent >= ALERT_MAX_PER_DAY) return;
+  props.setProperty(k, String(sent + 1));
+  var time = Utilities.formatDate(new Date(), tz, 'h:mm a');
+  var subject = 'New visitor on Victor’s website · ' + time + ' · ' + row[1].split(' (')[0];
+  var lines = [['Time', time + ' (Kampala time)'], ['Came from', row[1]], ['Referring site', row[2]], ['Landed on', row[3]],
+               ['Device', row[4]], ['Language', row[5]], ['Their time zone', row[6]], ['Visits today', String(today)]];
+  var html = '<div style="font-family:Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;border:1px solid #e7dccb;border-radius:14px;overflow:hidden">' +
+    '<div style="background:#14110f;padding:18px 22px;color:#efe6d6"><div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#e4b57f">Live visitor alert</div>' +
+    '<div style="font-family:Georgia,serif;font-size:22px;margin-top:6px">Someone is on Victor’s website</div></div>' +
+    '<div style="height:3px;background:#c98d4b"></div><table style="width:100%;border-collapse:collapse;font-size:14px;color:#2a231d">' +
+    lines.map(function (l, i) { return '<tr style="background:' + (i % 2 ? '#fbf6ee' : '#ffffff') + '"><td style="padding:9px 22px;color:#7d7062;width:42%">' + l[0] + '</td><td style="padding:9px 22px">' + l[1] + '</td></tr>'; }).join('') +
+    '</table><div style="padding:14px 22px;font-size:12px;color:#7d7062">Anonymous: no names, numbers or IP addresses are collected. Full log in the VISITS tab · ' +
+    (ALERT_MAX_PER_DAY - sent - 1) + ' alerts left today.</div></div>';
+  try { MailApp.sendEmail({ to: ALERT_TO, name: 'Victor Uringtho · Website', subject: subject, htmlBody: html,
+    body: lines.map(function (l) { return l[0] + ': ' + l[1]; }).join('\n') }); } catch (err) {}
 }
 
 /** Adds to today's row in STATS (one row per day keeps the Sheet small). */
@@ -369,17 +404,101 @@ function makeWeeklyPosts_() {
   posts.push(['Any day', 'Advertisers', 'Advertise with Victor Uringtho: reach gospel music lovers, churches and musicians every week on his website and at Friday Gospel Music in Kampala.\nRates: ' + url('#partners')]);
   var ss = getSheet_(), sh = ss.getSheetByName('WEEKLY_POSTS') || ss.insertSheet('WEEKLY_POSTS');
   if (sh.getLastRow() === 0) sh.appendRow(SCHEMA.WEEKLY_POSTS);
+  // one set per week: re-running replaces this week's rows instead of adding duplicates
+  if (sh.getLastRow() > 1) {
+    var col1 = sh.getRange(2, 1, sh.getLastRow() - 1, 1).getDisplayValues();
+    for (var i = col1.length - 1; i >= 0; i--) if (String(col1[i][0]).replace(/^'/, '') === weekOf) sh.deleteRow(i + 2);
+  }
   posts.forEach(function (p) { sh.appendRow(["'" + weekOf, p[0], p[1], p[2]]); });
   return { weekOf: weekOf, posts: posts };
 }
+// Who receives the Monday email (kept in code, never in the public feed)
+var REPORT_TO = 'vuringtho2@gmail.com';
+var REPORT_CC = 'odoema@gmail.com';
+
 function weeklyAutopilot() {
-  var r = makeWeeklyPosts_(), P = getPortfolio_(false).PROFILE || {}, to = P.enquiry_inbox || Session.getEffectiveUser().getEmail();
-  var body = 'Good morning Victor,\n\nHere are this week\'s posts. Copy each one to your WhatsApp status, WhatsApp channel, Facebook and TikTok on its day. ' +
-    'Every link brings people back to your website, and the numbers below show it working.\n\n' +
-    r.posts.map(function (p) { return '— ' + p[0].toUpperCase() + ' (' + p[1] + ')\n' + p[2]; }).join('\n\n') +
-    '\n\n— YOUR AUDIENCE\n' + audienceText_() + '\n\nAll posts are also saved in the WEEKLY_POSTS tab of the Sheet.';
-  try { MailApp.sendEmail({ to: to, subject: 'This week\'s posts — week of ' + r.weekOf, body: body }); } catch (err) {}
+  var r = makeWeeklyPosts_();
+  var to = REPORT_TO || (getPortfolio_(false).PROFILE || {}).enquiry_inbox || Session.getEffectiveUser().getEmail();
+  var w = audience_(7), m = audience_(30), fansSh = getSheet_().getSheetByName('FANS');
+  var fans = fansSh ? Math.max(0, fansSh.getLastRow() - 1) : 0;
+  var text = 'Good morning Victor,\n\nHere are this week\'s posts. Copy each one to your WhatsApp status, WhatsApp channel, Facebook and TikTok on its day.\n\n' +
+    r.posts.map(function (p) { return p[0].toUpperCase() + ' (' + p[1] + ')\n' + p[2]; }).join('\n\n') +
+    '\n\nYOUR AUDIENCE\n' + audienceText_() + '\n\nAll posts are also saved in the WEEKLY_POSTS tab of the Sheet.';
+  try {
+    MailApp.sendEmail({ to: to, cc: REPORT_CC, name: 'Victor Uringtho · Studio Autopilot',
+      subject: 'Your week on autopilot · ' + r.posts.length + ' posts ready · week of ' + r.weekOf,
+      body: text, htmlBody: weeklyEmailHtml_(r, w, m, fans) });
+  } catch (err) { Logger.log('Email not sent: ' + err); }
   return r;
+}
+
+/** Email-safe HTML (tables + inline styles) in the website's colours. */
+function weeklyEmailHtml_(r, w, m, fans) {
+  var e = function (v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+  var C = { ink: '#14110f', ink2: '#1c1815', card: '#ffffff', paper: '#f6f1e8', line: '#e7dccb', text: '#2a231d', muted: '#7d7062', brass: '#c98d4b', brass2: '#e4b57f', deep: '#8d5a26' };
+  var F = "font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;", SERIF = "font-family:Georgia,'Times New Roman',serif;";
+  var logo = SITE_URL + 'assets/brand/logo-192.png';
+  var sheetUrl = getSheet_().getUrl();
+  var tile = function (n, label) {
+    return '<td width="25%" style="padding:6px;" valign="top"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + C.ink2 + ';border-radius:12px;">' +
+      '<tr><td style="padding:16px 14px;' + F + '"><div style="' + SERIF + 'font-size:30px;line-height:1;color:' + C.brass2 + ';">' + e(n) + '</div>' +
+      '<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#bfb3a2;margin-top:8px;">' + e(label) + '</div></td></tr></table></td>';
+  };
+  var linkOf = function (t) { var mm = String(t).match(/https?:\/\/\S+/); return mm ? mm[0] : SITE_URL; };
+  var card = function (p, i) {
+    var body = String(p[2]), link = linkOf(body), copy = body.replace(/\s*https?:\/\/\S+/, '').replace(/\n[^\n]*:\s*$/, '').replace(/[:\s]+$/, '').trim();
+    var wa = 'https://wa.me/?text=' + encodeURIComponent(body), fb = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link);
+    return '<tr><td style="padding:0 0 14px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + C.card + ';border:1px solid ' + C.line + ';border-radius:14px;">' +
+      '<tr><td style="padding:18px 20px 6px;' + F + '">' +
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' +
+          '<td style="' + F + 'font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:' + C.deep + ';">' + e(p[0]) + '</td>' +
+          '<td align="right"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background:#f3e6d4;color:' + C.deep + ';' + F + 'font-size:11px;font-weight:600;">' + e(p[1]) + '</span></td>' +
+        '</tr></table></td></tr>' +
+      '<tr><td style="padding:6px 20px 4px;' + F + 'font-size:15px;line-height:1.6;color:' + C.text + ';">' + e(copy).replace(/\n/g, '<br>') + '</td></tr>' +
+      '<tr><td style="padding:4px 20px 0;' + F + 'font-size:12px;"><a href="' + e(link) + '" style="color:' + C.muted + ';text-decoration:none;word-break:break-all;">' + e(link.replace(/^https?:\/\//, '')) + '</a></td></tr>' +
+      '<tr><td style="padding:14px 20px 18px;"><table role="presentation" cellpadding="0" cellspacing="0"><tr>' +
+        '<td style="border-radius:999px;background:#1f8f4e;"><a href="' + e(wa) + '" style="display:inline-block;padding:10px 18px;' + F + 'font-size:13px;font-weight:700;color:#ffffff;text-decoration:none;">Share on WhatsApp</a></td>' +
+        '<td width="8"></td>' +
+        '<td style="border-radius:999px;border:1px solid ' + C.line + ';"><a href="' + e(fb) + '" style="display:inline-block;padding:9px 16px;' + F + 'font-size:13px;font-weight:600;color:' + C.text + ';text-decoration:none;">Post to Facebook</a></td>' +
+      '</tr></table></td></tr></table></td></tr>';
+  };
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"></head>' +
+  '<body style="margin:0;padding:0;background:' + C.paper + ';">' +
+  '<div style="display:none;max-height:0;overflow:hidden;">' + r.posts.length + ' ready-to-post messages for this week, plus your audience numbers.</div>' +
+  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + C.paper + ';"><tr><td align="center" style="padding:24px 12px;">' +
+  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;">' +
+    // header
+    '<tr><td style="background:' + C.ink + ';border-radius:18px 18px 0 0;padding:28px 28px 24px;">' +
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' +
+        '<td width="56" valign="middle"><img src="' + logo + '" width="52" height="52" alt="" style="display:block;border-radius:50%;border:0;"></td>' +
+        '<td valign="middle" style="padding-left:14px;' + F + '"><div style="' + SERIF + 'font-size:20px;color:#efe6d6;">Victor Uringtho</div>' +
+          '<div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:' + C.brass2 + ';margin-top:3px;">Studio autopilot · week of ' + e(r.weekOf) + '</div></td>' +
+      '</tr></table>' +
+      '<div style="' + SERIF + 'font-size:30px;line-height:1.2;color:#efe6d6;margin-top:26px;">Good morning, Victor.</div>' +
+      '<div style="' + F + 'font-size:15px;line-height:1.6;color:#d8ccb7;margin-top:10px;">Your posts for the week are written. Share one a day, on its day. Every link brings people back to your website, where they can listen, book you and join Friends of Victor.</div>' +
+    '</td></tr>' +
+    '<tr><td style="background:' + C.brass + ';height:4px;line-height:4px;font-size:0;">&nbsp;</td></tr>' +
+    // stats
+    '<tr><td style="background:' + C.ink + ';padding:18px 22px 24px;">' +
+      '<div style="' + F + 'font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#bfb3a2;padding:0 6px 6px;">Your audience · last 7 days</div>' +
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' +
+        tile(w.visits, 'Website visits') + tile(w.from_social, 'From your posts') + tile(fans, 'Friends of Victor') + tile(w.enquiries, 'Enquiries') +
+      '</tr></table>' +
+      '<div style="' + F + 'font-size:12px;color:#a99d8b;padding:10px 6px 0;">Last 30 days: ' + e(m.visits) + ' visits · ' + e(m.sponsor_clicks) + ' sponsor clicks · ' + e(m.signups) + ' new fans · ' + e(m.enquiries) + ' enquiries.</div>' +
+    '</td></tr>' +
+    // posts
+    '<tr><td style="background:' + C.paper + ';padding:26px 0 6px;' + F + '"><div style="' + SERIF + 'font-size:22px;color:' + C.text + ';">This week’s posts</div>' +
+      '<div style="font-size:13px;color:' + C.muted + ';margin-top:4px;">Tap “Share on WhatsApp” to send a post to your status, a group or your channel.</div></td></tr>' +
+    '<tr><td><table role="presentation" width="100%" cellpadding="0" cellspacing="0">' + r.posts.map(card).join('') + '</table></td></tr>' +
+    // tips + footer
+    '<tr><td style="padding:6px 0 18px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fbf6ee;border:1px dashed ' + C.brass2 + ';border-radius:14px;">' +
+      '<tr><td style="padding:18px 20px;' + F + 'font-size:14px;line-height:1.6;color:' + C.text + ';"><strong style="color:' + C.deep + ';">Grow it faster.</strong> Add a photo or a 15-second video from the studio to each post. Posts with your face and your sound travel furthest. Ask a church, studio or local business about the <a href="' + SITE_URL + '#partners" style="color:' + C.deep + ';">sponsor packages</a>.</td></tr></table></td></tr>' +
+    '<tr><td align="center" style="padding:6px 0 4px;"><table role="presentation" cellpadding="0" cellspacing="0"><tr>' +
+      '<td style="border-radius:999px;background:' + C.ink + ';"><a href="' + SITE_URL + '" style="display:inline-block;padding:12px 22px;' + F + 'font-size:13px;font-weight:700;color:' + C.brass2 + ';text-decoration:none;">Open your website</a></td><td width="8"></td>' +
+      '<td style="border-radius:999px;border:1px solid ' + C.line + ';"><a href="' + e(sheetUrl) + '" style="display:inline-block;padding:11px 20px;' + F + 'font-size:13px;font-weight:600;color:' + C.text + ';text-decoration:none;">Open the Sheet</a></td>' +
+    '</tr></table></td></tr>' +
+    '<tr><td align="center" style="padding:18px 20px 8px;' + F + 'font-size:11px;line-height:1.6;color:' + C.muted + ';">Sent automatically every Monday by your website’s autopilot.<br>Victor Unyuthfua Uringtho · Music producer, songwriter &amp; sound engineer · Kampala, Uganda</td></tr>' +
+  '</table></td></tr></table></body></html>';
 }
 function makeWeeklyPostsNow() {
   var r = weeklyAutopilot();

@@ -71,8 +71,24 @@
     return 'other';
   }
   function trackVisit() {
+    // ?me=1 once on your own phone/laptop and your visits stop counting (?me=0 to undo)
+    try {
+      var me = (location.search.match(/[?&]me=([01])/) || [])[1];
+      if (me === '1') localStorage.setItem('vu_me', '1'); if (me === '0') localStorage.removeItem('vu_me');
+      if (localStorage.getItem('vu_me')) return;
+    } catch (e) {}
+    if (navigator.webdriver || /bot|crawl|spider|slurp|lighthouse|headless|preview/i.test(navigator.userAgent)) return;
     try { if (sessionStorage.getItem('vu_seen')) return; sessionStorage.setItem('vu_seen', '1'); } catch (e) {}
-    beacon({ a: 'hit', src: trafficSource() });
+    var ua = navigator.userAgent, ref = '';
+    try { ref = document.referrer ? new URL(document.referrer).hostname.replace(/^www\./, '') : ''; } catch (e) {}
+    if (ref === location.hostname) ref = '';
+    var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    var land = (location.hash || '').replace('#', ''), sec = land && document.getElementById(land);
+    var head = sec && sec.querySelector('h2,h3');
+    beacon({ a: 'hit', src: trafficSource(), ref: ref, utm: (location.search.match(/utm_source=([^&]+)/) || [])[1] || '',
+      land: head ? head.textContent.trim().slice(0, 60) : (land || 'Home'),
+      dev: /iPad|Tablet/i.test(ua) ? 'Tablet' : /Mobi|Android|iPhone/i.test(ua) ? 'Phone' + (/Android/i.test(ua) ? ' (Android)' : /iPhone/i.test(ua) ? ' (iPhone)' : '') : 'Computer',
+      lang: navigator.language || '', tz: tz });
   }
 
   /* ---------------- players (lazy — nothing loads until tapped) ---------------- */
