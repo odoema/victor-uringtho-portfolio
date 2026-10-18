@@ -1,6 +1,6 @@
 const fs=require('fs'),vm=require('vm');
 const R=__dirname, S=R+'/src/';
-const SITE='https://odoema.github.io/victor-uringtho-portfolio/';
+const SITE='https://victoruringtho.com/';
 const API='https://script.google.com/macros/s/AKfycbwHq8KDHJHN5febSkLDoDGv4JFzNwCN89eAxcX9ACZRN0vtn-PPfbUSE5dxvYoIqiHDiQ/exec?format=json';
 const ctx={console,JSON,Date,CacheService:{getScriptCache:()=>({get:()=>null,put:()=>{}})},
  PropertiesService:{getScriptProperties:()=>({getProperty:()=>null})},SpreadsheetApp:{getActiveSpreadsheet:()=>null},Session:{getScriptTimeZone:()=>'Africa/Kampala'}};
