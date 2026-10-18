@@ -20,10 +20,10 @@
  */
 
 var CONFIG = {
-  SITE_TITLE: 'Victor Uringtho — Gospel Music Producer & Sound Engineer, Kampala, Uganda',
+  SITE_TITLE: 'Victor Uringtho | Gospel Music Producer & Sound Engineer, Kampala',
   SITE_DESCRIPTION:
-    'Ugandan music producer, songwriter and sound engineer in Kampala. Studio recording, mixing & mastering, ' +
-    'live sound, beats, music training and Friday Gospel Music.',
+    'Ugandan gospel music producer and sound engineer in Kampala: studio recording, mixing & mastering, ' +
+    'live sound, beats, music lessons and Friday Gospel Music.',
   CACHE_KEY: 'vu_portfolio_v1',
   CACHE_SECONDS: 600,            // 10 minutes; "Publish changes" clears it instantly
   PLACEHOLDER_RE: /\[(ADD|CONFIRM)[^\]]*\]/i

@@ -224,7 +224,11 @@
     $('#heroRoles').innerHTML = t(P.roles || '');
     $('#heroStatement').innerHTML = t(P.hero_statement || P.positioning || '');
     $('#footerRoles').innerHTML = t(P.roles || '');
-    if (A.casual) $('#nextPhoto').style.backgroundImage = 'url("' + A.casual + '")';
+    // load the lower photo only when the visitor gets near it
+    if (A.casual) {
+      var np = $('#nextPhoto'), setBg = function () { np.style.backgroundImage = 'url("' + A.casual + '")'; };
+      if ('IntersectionObserver' in window) { var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { setBg(); io.disconnect(); } }, { rootMargin: '600px' }); io.observe(np); } else setBg();
+    }
     var q = P.signature_quote;
     if (has(q)) $('#signatureQuote').innerHTML = '“' + t(q) + '”<cite>Victor Unyuthfua Uringtho</cite>';
     $('#year').textContent = new Date().getFullYear();
@@ -539,6 +543,13 @@
     });
   }
 
+  /* Alt text for search engines: says who is in the photo, without just repeating the caption */
+  function photoAlt(p) {
+    var a = String(p.alt || p.caption || '').trim();
+    if (!/victor/i.test(a)) a = 'Victor Uringtho' + (a ? ' — ' + a : '');
+    if (a === String(p.caption || '').trim()) a += ' (photo)';
+    return a;
+  }
   var PHOTOS = [];
   function renderEvents() {
     $('#eventList').innerHTML = list('EVENTS').map(function (e) {
@@ -555,7 +566,7 @@
     g.innerHTML = PHOTOS.map(function (p, i) {
       if (!p._src) return PREVIEW ? '<div class="shot shot-empty" data-cat="' + esc(p.category) + '">' + t(p.image) + '</div>' : '';
       return '<button class="shot reveal" type="button" data-i="' + i + '" data-cat="' + esc(p.category) + '" aria-label="Open photograph: ' + esc(p.caption || p.alt) + '">' +
-        '<img src="' + p._thumb + '" alt="' + esc(p.alt || p.caption || '') + '" loading="lazy" decoding="async">' +
+        '<img src="' + p._thumb + '" alt="' + esc(photoAlt(p)) + '" loading="lazy" decoding="async">' +
         (has(p.caption) ? '<span class="cap">' + t(p.caption) + '</span>' : '') + '</button>';
     }).join('');
     g.addEventListener('click', function (e) { var b = e.target.closest('.shot[data-i]'); if (b) openLightbox(+b.getAttribute('data-i')); });
