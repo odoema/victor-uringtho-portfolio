@@ -299,12 +299,12 @@ var ALERT_TO = 'odoema@gmail.com,vuringtho2@gmail.com';   // Brian and Victor
 var ALERT_MAX_PER_DAY = 45;          // 2 people per alert = 90 emails, inside Gmail's 100-a-day limit
 function logVisit_(b) {
   var clip = function (v, n) { return String(v || '').replace(/[\r\n<>]/g, ' ').slice(0, n || 80); };
-  var srcName = { social: 'Social media / WhatsApp', search: 'Google or another search engine', other: 'Direct link or other' }[b.src] || 'Direct link or other';
+  var srcName = clip(b.srcName, 140) || { social: 'Social media', search: 'Google or another search engine', other: 'Direct or another website' }[b.src] || 'Direct or another website';
   var place = [b.city, b.region, b.country].map(function (v) { return clip(v, 40); }).filter(String)
     .filter(function (v, i, a) { return a.indexOf(v) === i; }).join(', ');
   var ip = /^[0-9a-fA-F:.]{3,45}$/.test(String(b.ip || '')) ? String(b.ip) : '';
   var who = b.who && b.who.name ? clip(b.who.name, 60) + ' (' + clip(b.who.how, 30) + (b.who.since ? ', since ' + clip(b.who.since, 20) : '') + ')' : '';
-  var row = [new Date(), srcName + (b.utm ? ' (' + clip(b.utm, 30) + ')' : ''), clip(b.ref) || '—', clip(b.land) || 'Home',
+  var row = [new Date(), srcName, clip(b.ref) || '—', clip(b.land) || 'Home',
              clip(b.dev, 20) || '—', clip(b.lang, 20) || '—', clip(b.tz, 40) || '—',
              place || '—', clip(b.isp, 60) || '—', ip || '—', who || 'New or anonymous visitor'];
   var ss = getSheet_(); if (!ss) return;
@@ -321,7 +321,7 @@ function logVisit_(b) {
   props.setProperty(k, String(sent + 1));
   var time = Utilities.formatDate(new Date(), tz, 'h:mm a');
   var subject = (who ? 'Returning: ' + clip(b.who.name, 40) + ' is on Victor’s website' : 'New visitor on Victor’s website') +
-    ' · ' + time + (place ? ' · ' + place : '');
+    ' · ' + time + (place ? ' · ' + place : '') + ' · via ' + srcName.split(' — ')[0];
   var lines = [];
   if (who) lines.push(['Who', '<strong>' + who + '</strong>']);
   lines = lines.concat([['Time', time + ' (Kampala time)'], ['Where', place || 'Unknown'], ['Network', row[8]], ['IP address', row[9]],

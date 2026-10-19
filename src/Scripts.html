@@ -64,12 +64,34 @@
     try { if (navigator.sendBeacon && navigator.sendBeacon(u, new Blob([body], { type: 'text/plain' }))) return; } catch (e) {}
     try { fetch(u, { method: 'POST', mode: 'no-cors', keepalive: true, body: body }); } catch (e) {}
   }
-  function trafficSource() {
-    var q = location.search, r = document.referrer || '';
-    if (/utm_source=/.test(q) || /facebook|fb\.|whatsapp|wa\.me|tiktok|instagram|t\.co|twitter|x\.com|youtube|linkedin/i.test(r)) return 'social';
-    if (/google\.|bing\.|yahoo\.|duckduckgo|ecosia/i.test(r)) return 'search';
-    return 'other';
+  /* Where a visitor came from, in plain words. group feeds the STATS totals; name is shown in the alert. */
+  function sourceDetail() {
+    var q = location.search, r = document.referrer || '', ua = navigator.userAgent, host = '';
+    try { host = r ? new URL(r).hostname.replace(/^www\.|^m\.|^l\.|^lm\./, '') : ''; } catch (e) {}
+    if (host === location.hostname) host = '';
+    var utm = decodeURIComponent((q.match(/utm_source=([^&]+)/) || [])[1] || '').toLowerCase();
+    var NAMES = { whatsapp: 'WhatsApp', facebook: 'Facebook', instagram: 'Instagram', tiktok: 'TikTok', youtube: 'YouTube', x: 'X (Twitter)', twitter: 'X (Twitter)', linkedin: 'LinkedIn', email: 'Email', sms: 'SMS' };
+    var SOCIAL = [[/facebook\.com|fb\.com|fb\.me/, 'Facebook'], [/instagram\.com/, 'Instagram'], [/tiktok\.com/, 'TikTok'], [/youtube\.com|youtu\.be/, 'YouTube'],
+      [/t\.co$|twitter\.com|x\.com/, 'X (Twitter)'], [/linkedin\.com|lnkd\.in/, 'LinkedIn'], [/whatsapp\.com|wa\.me/, 'WhatsApp'], [/snapchat\.com/, 'Snapchat'], [/telegram|t\.me/, 'Telegram']];
+    var SEARCH = [[/google\./, 'Google Search'], [/bing\.com/, 'Bing'], [/yahoo\./, 'Yahoo'], [/duckduckgo/, 'DuckDuckGo'], [/ecosia/, 'Ecosia'], [/yandex/, 'Yandex']];
+    var MAIL = [[/mail\.google|com\.google\.android\.gm/, 'Gmail'], [/outlook|live\.com|office\.com/, 'Outlook'], [/mail\.yahoo/, 'Yahoo Mail']];
+    var hit = function (list) { for (var i = 0; i < list.length; i++) if (list[i][0].test(host || r)) return list[i][1]; return ''; };
+    var n;
+    if (utm) return { group: 'social', name: (NAMES[utm] || utm) + ' — a link from Victor’s posts' };
+    if ((n = hit(MAIL))) return { group: 'other', name: n + ' — a link in an email' };
+    if ((n = hit(SEARCH))) return { group: 'search', name: n + ' — found the site by searching' };
+    if ((n = hit(SOCIAL))) return { group: 'social', name: n };
+    // Apps that open links inside themselves say who they are in the browser name
+    if (/FBAN|FBAV|FB_IAB/.test(ua)) return { group: 'social', name: 'Facebook app' };
+    if (/Instagram/.test(ua)) return { group: 'social', name: 'Instagram app' };
+    if (/TikTok|musical_ly|Bytedance/i.test(ua)) return { group: 'social', name: 'TikTok app' };
+    if (/LinkedInApp/.test(ua)) return { group: 'social', name: 'LinkedIn app' };
+    if (/Snapchat/.test(ua)) return { group: 'social', name: 'Snapchat app' };
+    if (/WhatsApp/i.test(ua)) return { group: 'social', name: 'WhatsApp' };
+    if (host) return { group: 'other', name: 'Another website: ' + host };
+    return { group: 'other', name: 'Direct — typed the address, used a bookmark, or tapped a link in WhatsApp, SMS or email (these apps don’t say which)' };
   }
+  function trafficSource() { return sourceDetail().group; }
   function trackVisit() {
     // ?me=1 once on your own phone/laptop and your visits stop counting (?me=0 to undo)
     try {
@@ -85,7 +107,8 @@
     var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
     var land = (location.hash || '').replace('#', ''), sec = land && document.getElementById(land);
     var head = sec && sec.querySelector('h2,h3');
-    var hit = { a: 'hit', src: trafficSource(), ref: ref, utm: (location.search.match(/utm_source=([^&]+)/) || [])[1] || '',
+    var sd = sourceDetail();
+    var hit = { a: 'hit', src: sd.group, srcName: sd.name, ref: ref, utm: (location.search.match(/utm_source=([^&]+)/) || [])[1] || '',
       land: head ? head.textContent.trim().slice(0, 60) : (land || 'Home'),
       dev: /iPad|Tablet/i.test(ua) ? 'Tablet' : /Mobi|Android|iPhone/i.test(ua) ? 'Phone' + (/Android/i.test(ua) ? ' (Android)' : /iPhone/i.test(ua) ? ' (iPhone)' : '') : 'Computer',
       lang: navigator.language || '', tz: tz, who: knownVisitor() };
