@@ -213,7 +213,7 @@ p{margin:0 0 var(--s3)}
 .play-btn:hover{border-color:var(--brass-2);color:var(--brass-2)}
 /* Real album artwork (wide, with a flip to the back cover) */
 .release .cover.wide{aspect-ratio:1205/625;background:#0a0908}
-@media (min-width:700px){.release:has(.cover.wide){grid-column:span 2}}
+@media (min-width:721px){.release:has(.cover.wide){grid-column:span 2}}
 .cover.wide .type-badge{top:auto;bottom:10px}
 .cover.flipped .type-badge{opacity:0}
 .release .cover.wide img{object-fit:cover}
@@ -642,4 +642,67 @@ dialog::backdrop{background:rgba(10,8,7,.94);backdrop-filter:blur(4px)}
   .reveal,.hero-name .line span{opacity:1!important;transform:none!important}
   .hero-photo{transform:none!important}
 }
+
+/* ==========================================================================
+   COLOUR JOURNEY — the page starts in brown and moves, step by step, through
+   golden brown, amber, orange, coral, red, maroon and deep pink, then eases
+   back towards brown. Each guitar chord (story chapter) gets its own shade, and
+   each section after it continues the journey. Text colours stay the same, so
+   reading comfort does not change — only the warmth around it.
+   ========================================================================== */
+.tone-1{--brass:#c98d4b;--brass-2:#e4b57f;--brass-deep:#8d5a26;--ink:#17110c;--ink-2:#1f1710;--ink-3:#2a1f16;--glow:201,141,75}   /* brown        */
+.tone-2{--brass:#e08a3c;--brass-2:#f3b77a;--brass-deep:#9a521b;--ink:#1a100a;--ink-2:#23150c;--ink-3:#2e1c10;--glow:224,138,60}   /* amber        */
+.tone-3{--brass:#e0682f;--brass-2:#f6a072;--brass-deep:#9a3d14;--ink:#1b0e09;--ink-2:#24130c;--ink-3:#301a10;--glow:224,104,47}   /* orange       */
+.tone-4{--brass:#d9483a;--brass-2:#f38a7c;--brass-deep:#8f2a20;--ink:#1c0c0b;--ink-2:#26100e;--ink-3:#321613;--glow:217,72,58}    /* red          */
+.tone-5{--brass:#c04a62;--brass-2:#e8a0b0;--brass-deep:#7a2236;--ink:#1a0b0f;--ink-2:#241015;--ink-3:#2f151c;--glow:160,40,64}    /* maroon       */
+.tone-6{--brass:#d24d82;--brass-2:#f19bbd;--brass-deep:#8c2453;--ink:#1b0b14;--ink-2:#25101b;--ink-3:#301524;--glow:210,77,130}   /* deep pink    */
+.tone-7{--brass:#e5664f;--brass-2:#f7a48f;--brass-deep:#9b3a2a;--ink:#1c0e0c;--ink-2:#261310;--ink-3:#321915;--glow:229,102,79}   /* coral        */
+.tone-8{--brass:#d29a4a;--brass-2:#ecc184;--brass-deep:#8f6122;--ink:#18110a;--ink-2:#21170e;--ink-3:#2c1f13;--glow:210,154,74}   /* golden brown */
+
+/* Sections, in page order: a gentle wave through the palette */
+.stats,#story,#contact,.footer,#events{--brass:#c98d4b;--brass-2:#e4b57f;--brass-deep:#8d5a26;--ink:#17110c;--ink-2:#1f1710;--ink-3:#2a1f16;--glow:201,141,75}
+#people{--brass:#d24d82;--brass-2:#f19bbd;--brass-deep:#8c2453;--ink:#1b0b14;--ink-2:#25101b;--ink-3:#301524;--glow:210,77,130}
+#music{--brass:#c04a62;--brass-2:#e8a0b0;--brass-deep:#7a2236;--ink:#1a0b0f;--ink-2:#241015;--ink-3:#2f151c;--glow:160,40,64}
+#services,#next{--brass:#d9483a;--brass-2:#f38a7c;--brass-deep:#8f2a20;--ink:#1c0c0b;--ink-2:#26100e;--ink-3:#321613;--glow:217,72,58}
+#fridays,#partners{--brass:#e5664f;--brass-2:#f7a48f;--brass-deep:#9b3a2a;--ink:#1c0e0c;--ink-2:#261310;--ink-3:#321915;--glow:229,102,79}
+#artists{--brass:#e0682f;--brass-2:#f6a072;--brass-deep:#9a3d14;--ink:#1b0e09;--ink-2:#24130c;--ink-3:#301a10;--glow:224,104,47}
+#bands,#milestones{--brass:#e08a3c;--brass-2:#f3b77a;--brass-deep:#9a521b;--ink:#1a100a;--ink-2:#23150c;--ink-3:#2e1c10;--glow:224,138,60}
+#craft,#legacy{--brass:#d29a4a;--brass-2:#ecc184;--brass-deep:#8f6122;--ink:#18110a;--ink-2:#21170e;--ink-3:#2c1f13;--glow:210,154,74}
+#music .play-album{box-shadow:0 8px 24px -10px rgba(var(--glow),.8)}
+
+.stats,.section,.footer{
+  background:
+    radial-gradient(110% 60% at 8% 0%, rgba(var(--glow),.17), transparent 62%),
+    radial-gradient(80% 50% at 100% 100%, rgba(var(--glow),.09), transparent 60%),
+    var(--ink);
+  transition:background-color .6s var(--ease)}
+.section-alt{
+  background:
+    radial-gradient(110% 60% at 92% 0%, rgba(var(--glow),.19), transparent 62%),
+    radial-gradient(80% 50% at 0% 100%, rgba(var(--glow),.10), transparent 60%),
+    var(--ink-2)}
+/* a soft seam of colour where one section hands over to the next */
+.section::after{content:"";position:absolute;left:0;right:0;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(var(--glow),.55),transparent);pointer-events:none}
+
+/* Story: every guitar chord brings a new shade (chapters cycle through the 8 tones) */
+.chapters{--gap:clamp(4rem,9vw,7rem);gap:var(--gap);position:relative;isolation:isolate}
+.chapter{position:relative}
+.chapter::before{content:"";position:absolute;z-index:-1;pointer-events:none;
+  top:calc(var(--gap) / -2);bottom:calc(var(--gap) / -2);left:calc(50% - 50vw);right:calc(50% - 50vw);
+  background:
+    radial-gradient(70% 55% at 18% 45%, rgba(var(--glow),.20), transparent 70%),
+    linear-gradient(180deg, transparent, rgba(var(--glow),.09) 25%, rgba(var(--glow),.09) 75%, transparent)}
+.chapter:nth-child(8n+1){--brass:#c98d4b;--brass-2:#e4b57f;--glow:201,141,75}
+.chapter:nth-child(8n+2){--brass:#d29a4a;--brass-2:#ecc184;--glow:210,154,74}
+.chapter:nth-child(8n+3){--brass:#e08a3c;--brass-2:#f3b77a;--glow:224,138,60}
+.chapter:nth-child(8n+4){--brass:#e0682f;--brass-2:#f6a072;--glow:224,104,47}
+.chapter:nth-child(8n+5){--brass:#e5664f;--brass-2:#f7a48f;--glow:229,102,79}
+.chapter:nth-child(8n+6){--brass:#d9483a;--brass-2:#f38a7c;--glow:217,72,58}
+.chapter:nth-child(8n+7){--brass:#c04a62;--brass-2:#e8a0b0;--glow:160,40,64}
+.chapter:nth-child(8n+8){--brass:#d24d82;--brass-2:#f19bbd;--glow:210,77,130}
+.chapter .chord-name,.chapter .chapter-summary{transition:color .6s var(--ease)}
+.chapter .pull{border-color:var(--brass)}
+@media (max-width:720px){.chapters{--gap:3rem}}
+@media (prefers-reduced-motion:reduce){.stats,.section,.footer,.chapter .chord-name,.chapter .chapter-summary{transition:none}}
 </style>
