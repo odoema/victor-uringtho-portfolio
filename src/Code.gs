@@ -54,7 +54,7 @@ var SCHEMA = {
   FANS:         ['timestamp', 'name', 'contact', 'interests', 'source'],
   STATS:        ['date', 'visits', 'from_social', 'from_search', 'from_other', 'sponsor_clicks', 'signups', 'enquiries'],
   WEEKLY_POSTS: ['week_of', 'day', 'theme', 'post'],
-  VISITS:       ['time', 'source', 'came_from', 'landed_on', 'device', 'language', 'timezone']
+  VISITS:       ['time', 'source', 'came_from', 'landed_on', 'device', 'language', 'timezone', 'location', 'network', 'ip_address', 'visitor']
 };
 
 // never sent to the browser
@@ -295,16 +295,22 @@ function joinFans_(f) {
 }
 
 /* ---------- Every visit: a row in VISITS and an instant email ---------- */
-var ALERT_TO = 'odoema@gmail.com';
-var ALERT_MAX_PER_DAY = 60;          // stays well inside Gmail's daily sending limit
+var ALERT_TO = 'odoema@gmail.com,vuringtho2@gmail.com';   // Brian and Victor
+var ALERT_MAX_PER_DAY = 45;          // 2 people per alert = 90 emails, inside Gmail's 100-a-day limit
 function logVisit_(b) {
   var clip = function (v, n) { return String(v || '').replace(/[\r\n<>]/g, ' ').slice(0, n || 80); };
   var srcName = { social: 'Social media / WhatsApp', search: 'Google or another search engine', other: 'Direct link or other' }[b.src] || 'Direct link or other';
+  var place = [b.city, b.region, b.country].map(function (v) { return clip(v, 40); }).filter(String)
+    .filter(function (v, i, a) { return a.indexOf(v) === i; }).join(', ');
+  var ip = /^[0-9a-fA-F:.]{3,45}$/.test(String(b.ip || '')) ? String(b.ip) : '';
+  var who = b.who && b.who.name ? clip(b.who.name, 60) + ' (' + clip(b.who.how, 30) + (b.who.since ? ', since ' + clip(b.who.since, 20) : '') + ')' : '';
   var row = [new Date(), srcName + (b.utm ? ' (' + clip(b.utm, 30) + ')' : ''), clip(b.ref) || '—', clip(b.land) || 'Home',
-             clip(b.dev, 20) || '—', clip(b.lang, 20) || '—', clip(b.tz, 40) || '—'];
+             clip(b.dev, 20) || '—', clip(b.lang, 20) || '—', clip(b.tz, 40) || '—',
+             place || '—', clip(b.isp, 60) || '—', ip || '—', who || 'New or anonymous visitor'];
   var ss = getSheet_(); if (!ss) return;
   var sh = ss.getSheetByName('VISITS') || ss.insertSheet('VISITS');
   if (sh.getLastRow() === 0) sh.appendRow(SCHEMA.VISITS);
+  else if (sh.getLastColumn() < SCHEMA.VISITS.length) sh.getRange(1, 1, 1, SCHEMA.VISITS.length).setValues([SCHEMA.VISITS]);
   sh.appendRow(row);
   // instant email, capped per day
   var props = PropertiesService.getScriptProperties(), tz = Session.getScriptTimeZone();
@@ -314,18 +320,30 @@ function logVisit_(b) {
   if (sent >= ALERT_MAX_PER_DAY) return;
   props.setProperty(k, String(sent + 1));
   var time = Utilities.formatDate(new Date(), tz, 'h:mm a');
-  var subject = 'New visitor on Victor’s website · ' + time + ' · ' + row[1].split(' (')[0];
-  var lines = [['Time', time + ' (Kampala time)'], ['Came from', row[1]], ['Referring site', row[2]], ['Landed on', row[3]],
-               ['Device', row[4]], ['Language', row[5]], ['Their time zone', row[6]], ['Visits today', String(today)]];
+  var subject = (who ? 'Returning: ' + clip(b.who.name, 40) + ' is on Victor’s website' : 'New visitor on Victor’s website') +
+    ' · ' + time + (place ? ' · ' + place : '');
+  var lines = [];
+  if (who) lines.push(['Who', '<strong>' + who + '</strong>']);
+  lines = lines.concat([['Time', time + ' (Kampala time)'], ['Where', place || 'Unknown'], ['Network', row[8]], ['IP address', row[9]],
+    ['Came from', row[1]], ['Referring site', row[2]], ['Landed on', row[3]], ['Device', row[4]], ['Language', row[5]],
+    ['Their time zone', row[6]], ['Visits today', String(today)]]);
   var html = '<div style="font-family:Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;border:1px solid #e7dccb;border-radius:14px;overflow:hidden">' +
-    '<div style="background:#14110f;padding:18px 22px;color:#efe6d6"><div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#e4b57f">Live visitor alert</div>' +
-    '<div style="font-family:Georgia,serif;font-size:22px;margin-top:6px">Someone is on Victor’s website</div></div>' +
+    '<div style="background:#14110f;padding:18px 22px;color:#efe6d6"><div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#e4b57f">' + (who ? 'A known visitor is back' : 'Live visitor alert') + '</div>' +
+    '<div style="font-family:Georgia,serif;font-size:22px;margin-top:6px">' + (who ? clip(b.who.name, 40) + ' is on Victor’s website' : 'Someone is on Victor’s website') + '</div></div>' +
     '<div style="height:3px;background:#c98d4b"></div><table style="width:100%;border-collapse:collapse;font-size:14px;color:#2a231d">' +
     lines.map(function (l, i) { return '<tr style="background:' + (i % 2 ? '#fbf6ee' : '#ffffff') + '"><td style="padding:9px 22px;color:#7d7062;width:42%">' + l[0] + '</td><td style="padding:9px 22px">' + l[1] + '</td></tr>'; }).join('') +
-    '</table><div style="padding:14px 22px;font-size:12px;color:#7d7062">Anonymous: no names, numbers or IP addresses are collected. Full log in the VISITS tab · ' +
-    (ALERT_MAX_PER_DAY - sent - 1) + ' alerts left today.</div></div>';
+    '</table><div style="padding:14px 22px;font-size:12px;color:#7d7062">Location and network are approximate (from the IP address). Names appear only for people who joined Friends of Victor or sent an enquiry. ' +
+    'Personal data: keep this email private. Full log in the VISITS tab · ' + (ALERT_MAX_PER_DAY - sent - 1) + ' alerts left today.</div></div>';
   try { MailApp.sendEmail({ to: ALERT_TO, name: 'Victor Uringtho · Website', subject: subject, htmlBody: html,
-    body: lines.map(function (l) { return l[0] + ': ' + l[1]; }).join('\n') }); } catch (err) {}
+    body: lines.map(function (l) { return l[0] + ': ' + String(l[1]).replace(/<[^>]+>/g, ''); }).join('\n') }); } catch (err) {}
+}
+
+/** Privacy promise: visit records older than 12 months are deleted (runs with the Monday autopilot). */
+function purgeOldVisits_() {
+  var ss = getSheet_(), sh = ss && ss.getSheetByName('VISITS'); if (!sh || sh.getLastRow() < 2) return 0;
+  var cut = new Date(Date.now() - 365 * 864e5), vals = sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues(), n = 0;
+  for (var i = vals.length - 1; i >= 0; i--) if (vals[i][0] instanceof Date && vals[i][0] < cut) { sh.deleteRow(i + 2); n++; }
+  return n;
 }
 
 /** Adds to today's row in STATS (one row per day keeps the Sheet small). */
@@ -418,6 +436,7 @@ var REPORT_TO = 'vuringtho2@gmail.com';
 var REPORT_CC = 'odoema@gmail.com';
 
 function weeklyAutopilot() {
+  try { purgeOldVisits_(); } catch (e) {}
   var r = makeWeeklyPosts_();
   var to = REPORT_TO || (getPortfolio_(false).PROFILE || {}).enquiry_inbox || Session.getEffectiveUser().getEmail();
   var w = audience_(7), m = audience_(30), fansSh = getSheet_().getSheetByName('FANS');

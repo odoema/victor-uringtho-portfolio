@@ -85,11 +85,26 @@
     var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
     var land = (location.hash || '').replace('#', ''), sec = land && document.getElementById(land);
     var head = sec && sec.querySelector('h2,h3');
-    beacon({ a: 'hit', src: trafficSource(), ref: ref, utm: (location.search.match(/utm_source=([^&]+)/) || [])[1] || '',
+    var hit = { a: 'hit', src: trafficSource(), ref: ref, utm: (location.search.match(/utm_source=([^&]+)/) || [])[1] || '',
       land: head ? head.textContent.trim().slice(0, 60) : (land || 'Home'),
       dev: /iPad|Tablet/i.test(ua) ? 'Tablet' : /Mobi|Android|iPhone/i.test(ua) ? 'Phone' + (/Android/i.test(ua) ? ' (Android)' : /iPhone/i.test(ua) ? ' (iPhone)' : '') : 'Computer',
-      lang: navigator.language || '', tz: tz });
+      lang: navigator.language || '', tz: tz, who: knownVisitor() };
+    // Approximate location + network from the IP address (see the privacy notice). Gives up after 2.5 s.
+    var sent = false, send = function () { if (!sent) { sent = true; beacon(hit); } };
+    setTimeout(send, 2500);
+    try {
+      fetch('https://get.geojs.io/v1/ip/geo.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (g) {
+        hit.ip = g.ip; hit.city = g.city; hit.region = g.region; hit.country = g.country; hit.isp = g.organization_name;
+        send();
+      }).catch(send);
+    } catch (e) { send(); }
   }
+  /* People who joined Friends of Victor or sent an enquiry are remembered on their own device (see privacy notice) */
+  function rememberVisitor(name, how) {
+    if (!has(name)) return;
+    try { localStorage.setItem('vu_who', JSON.stringify({ name: String(name).trim().slice(0, 60), how: how, since: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) })); } catch (e) {}
+  }
+  function knownVisitor() { try { return JSON.parse(localStorage.getItem('vu_who') || 'null'); } catch (e) { return null; } }
 
   /* ---------------- players (lazy — nothing loads until tapped) ---------------- */
   function spotifyEmbed(url) {
@@ -526,6 +541,7 @@
     var form = $('#joinForm'); if (!form) return;
     if (has(P.join_title)) $('#joinTitle').textContent = P.join_title;
     if (has(P.join_pitch)) $('#joinPitch').textContent = P.join_pitch;
+    document.addEventListener('click', function (e) { if (e.target.closest('a[href="#privacy"]')) { var d = $('#privacy'); if (d) d.open = true; } });
     var status = $('#joinStatus');
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -537,7 +553,7 @@
       var btn = form.querySelector('button'); btn.disabled = true; status.textContent = 'Adding you…';
       api({ a: 'join', name: name, contact: contact, interests: ints, source: decodeURIComponent(src), website: F.namedItem('website').value }, function (r) {
         btn.disabled = false;
-        if (r && r.ok) { form.reset(); status.textContent = r.already ? 'You’re already on the list. See you on Friday!' : 'Welcome to Friends of Victor! We’ll be in touch.'; }
+        if (r && r.ok) { rememberVisitor(name, 'Friends of Victor'); form.reset(); status.textContent = r.already ? 'You’re already on the list. See you on Friday!' : 'Welcome to Friends of Victor! We’ll be in touch.'; }
         else status.textContent = (r && r.error) || 'We couldn’t reach the list just now. Please try again in a minute.';
       });
     });
@@ -618,7 +634,7 @@
         data.a = 'enquiry';
         api(data, function (r) {
           sbtn.disabled = false;
-          if (r && r.ok) { form.reset(); status.textContent = 'Thank you — your message has been received.'; return; }
+          if (r && r.ok) { rememberVisitor(data.name, 'Sent an enquiry'); form.reset(); status.textContent = 'Thank you — your message has been received.'; return; }
           if (r && r.error) { status.textContent = r.error; return; }
           mailtoFallback();
         });
@@ -636,7 +652,7 @@
       var btn = form.querySelector('button'); btn.disabled = true; status.textContent = 'Sending…';
       google.script.run.withSuccessHandler(function (r) {
         btn.disabled = false;
-        if (r && r.ok) { form.reset(); status.textContent = 'Thank you — your message has been received.'; }
+        if (r && r.ok) { rememberVisitor(data.name, 'Sent an enquiry'); form.reset(); status.textContent = 'Thank you — your message has been received.'; }
         else status.textContent = (r && r.error) || 'Something went wrong. Please try again.';
       }).withFailureHandler(function () { btn.disabled = false; status.textContent = 'Something went wrong. Please try again.'; })
         .submitEnquiry(data);
