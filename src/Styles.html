@@ -211,6 +211,19 @@ p{margin:0 0 var(--s3)}
 .play-btn{width:100%;display:flex;align-items:center;gap:.7rem;background:transparent;border:1px solid var(--line-2);color:var(--paper);
   border-radius:999px;padding:.6rem 1rem;cursor:pointer;font:600 .85rem var(--f-body);transition:all .25s}
 .play-btn:hover{border-color:var(--brass-2);color:var(--brass-2)}
+/* Real album artwork (wide, with a flip to the back cover) */
+.release .cover.wide{aspect-ratio:1205/625;background:#0a0908}
+@media (min-width:700px){.release:has(.cover.wide){grid-column:span 2}}
+.cover.wide .type-badge{top:auto;bottom:10px}
+.cover.flipped .type-badge{opacity:0}
+.release .cover.wide img{object-fit:cover}
+.cover .back{position:absolute;inset:0;opacity:0;transition:opacity .5s var(--ease)}
+.cover.flipped .back{opacity:1}
+.cover.flipped .front{opacity:0}
+.cover .front{transition:opacity .5s var(--ease),transform .8s var(--ease)}
+.cover .flip{position:absolute;right:10px;bottom:10px;z-index:2;background:rgba(20,17,15,.78);color:var(--brass-2);border:1px solid var(--brass);border-radius:999px;
+  padding:.35rem .8rem;font:600 .72rem var(--f-mono);letter-spacing:.06em;cursor:pointer;backdrop-filter:blur(4px)}
+.cover .flip:hover{background:var(--brass);color:var(--ink)}
 /* Album: a big, unmistakable play button */
 .play-album{background:var(--brass);border-color:var(--brass);color:var(--ink);padding:.55rem 1.4rem .55rem .55rem;gap:.9rem;box-shadow:0 8px 24px -10px rgba(201,141,75,.7)}
 .play-album:hover{background:var(--brass-2);border-color:var(--brass-2);color:var(--ink);transform:translateY(-2px)}

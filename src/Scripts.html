@@ -325,7 +325,9 @@
     if (!items.length) { grid.innerHTML = '<p class="empty-note">New music is being added to the archive.</p>'; return; }
     grid.innerHTML = items.map(function (m) {
       if (!has(m.title)) m.title = has(m.artist) ? 'Production for ' + m.artist : 'Untitled recording';
-      var cover = img(m.cover_image, 700);
+      var covers = String(m.cover_image || '').split(/\s*\n\s*|\s+\|\s+/).filter(function (c) { return c.trim(); });
+      var cover = img(covers[0], 1200), back = covers[1] ? img(covers[1], 1200) : '';
+      var wide = /thank-you-lord-front|[?&#]wide/.test(cover) || !!back;
       var roles = splitList(m.roles);
       var pl = playerFor(m);
       var links = [];
@@ -333,7 +335,8 @@
       if (has(m.youtube_url) && !isPh(m.youtube_url)) links.push('<a href="' + esc(m.youtube_url) + '" target="_blank" rel="noopener">YouTube ↗</a>');
       if (has(m.related_chapter)) links.push('<a href="#ch-' + esc(m.related_chapter) + '">Read the story →</a>');
       return '<article class="release reveal" id="m-' + esc(m.id || slug(m.title)) + '" data-type="' + esc(m.type) + '" data-role="' + esc(roles.join('|')) + '">' +
-        '<div class="cover">' + (cover ? '<img src="' + cover + '" alt="Artwork: ' + esc(m.title) + '" loading="lazy" decoding="async">' :
+        '<div class="cover' + (wide ? ' wide' : '') + (back ? ' has-back' : '') + '">' + (cover ? '<img class="front" src="' + cover + '" alt="Album cover: ' + esc(m.title) + ' by ' + esc(m.artist || 'Victor Uringtho') + '" loading="lazy" decoding="async">' +
+          (back ? '<img class="back" src="' + back + '" alt="Back cover: ' + esc(m.title) + ' tracklist" loading="lazy" decoding="async"><button class="flip" type="button" aria-pressed="false">Tracklist ⟳</button>' : '') :
           '<div class="cover-gen" aria-hidden="true"><span class="vinyl"></span><span class="cy">' + esc(m.year || '') + '</span><span class="ct">' + esc(m.title || '') + '</span></div>') +
           (has(m.type) ? '<span class="type-badge">' + t(m.type) + '</span>' : '') + '</div>' +
         '<div class="release-body"><h3>' + t(m.title) + '</h3>' +
@@ -346,7 +349,10 @@
             : '<button class="play-btn" type="button" data-title="' + esc(m.title) + '" data-player=\'' + esc(JSON.stringify(pl)) + '\'><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>' + esc(pl.label) + '</button>') : '') + '</div>' +
         '</div></article>';
     }).join('');
-    grid.addEventListener('click', function (e) { var b = e.target.closest('.play-btn'); if (b) mountPlayer(b); });
+    grid.addEventListener('click', function (e) {
+      var b = e.target.closest('.play-btn'); if (b) { mountPlayer(b); return; }
+      var f = e.target.closest('.flip'); if (f) { var c = f.closest('.cover'), on = c.classList.toggle('flipped'); f.setAttribute('aria-pressed', on); f.textContent = on ? 'Front cover ⟳' : 'Tracklist ⟳'; }
+    });
 
     var types = items.map(function (m) { return m.type; });
     var roleVals = [].concat.apply([], items.map(function (m) { return splitList(m.roles); }));

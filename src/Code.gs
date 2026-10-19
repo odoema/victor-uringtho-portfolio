@@ -660,7 +660,7 @@ var TEXT_FIXES = [
 // Tabs whose rows are swapped for the new seed, but only if every row still has one of these old default names
 var REPLACE_IF_DEFAULT = { SERVICES: ['service', ['Music production', 'Recording', 'Mixing & mastering', 'Live sound', 'Songwriting & arranging']] };
 // Cells filled from the seed when they are still empty in the Sheet (never overwrites your text)
-var FILL_FIELDS = { MUSIC: ['id', ['audio_url']], ARTISTS: ['name', ['project', 'year']] };
+var FILL_FIELDS = { MUSIC: ['id', ['audio_url', 'cover_image']], ARTISTS: ['name', ['project', 'year']] };
 // Re-number rows to make room for new ones: [tab, key column, key, old order, new order] — only if the order is still the old one
 var ORDER_FIXES = [
   ['PRICING', 'item', 'Music production & recording course', 17, 18],
