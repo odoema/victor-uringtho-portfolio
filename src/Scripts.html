@@ -160,7 +160,7 @@
   }
   function playerFor(item) {
     var tr = parseTracks(item.audio_url);
-    if (tr.length > 1) return { tracks: tr, label: 'Play the album · ' + tr.length + ' tracks' };
+    if (tr.length > 1) return { tracks: tr, label: 'Play album now', sub: tr.length + ' tracks' };
     if (has(item.spotify_url) && !isPh(item.spotify_url)) { var s = spotifyEmbed(item.spotify_url); if (s) return s; }
     if (has(item.audio_url) && !isPh(item.audio_url)) { var a = audioEmbed(item.audio_url); if (a) return a; }
     if (has(item.youtube_url) && !isPh(item.youtube_url)) { var y = youtubeEmbed(item.youtube_url); if (y) return y; }
@@ -341,7 +341,9 @@
           (roles.length ? '<div class="roles" aria-label="Victor’s role">' + roles.map(function (r) { return '<span class="tag">' + t(r) + '</span>'; }).join('') + '</div>' : '') +
           (has(m.description) ? '<p class="release-desc">' + t(m.description) + '</p>' : '') +
           (links.length ? '<div class="listen-links">' + links.join('') + '</div>' : '') +
-          '<div class="player">' + (pl ? '<button class="play-btn" type="button" data-title="' + esc(m.title) + '" data-player=\'' + esc(JSON.stringify(pl)) + '\'><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>' + esc(pl.label) + '</button>' : '') + '</div>' +
+          '<div class="player">' + (pl ? (pl.tracks
+            ? '<button class="play-btn play-album" type="button" aria-label="Play the album ' + esc(m.title) + ' now" data-title="' + esc(m.title) + '" data-player=\'' + esc(JSON.stringify(pl)) + '\'><span class="pa-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span><span class="pa-text"><strong>' + esc(pl.label) + '</strong><small>' + esc(pl.sub) + '</small></span></button>'
+            : '<button class="play-btn" type="button" data-title="' + esc(m.title) + '" data-player=\'' + esc(JSON.stringify(pl)) + '\'><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>' + esc(pl.label) + '</button>') : '') + '</div>' +
         '</div></article>';
     }).join('');
     grid.addEventListener('click', function (e) { var b = e.target.closest('.play-btn'); if (b) mountPlayer(b); });

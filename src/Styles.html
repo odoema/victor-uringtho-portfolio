@@ -211,6 +211,15 @@ p{margin:0 0 var(--s3)}
 .play-btn{width:100%;display:flex;align-items:center;gap:.7rem;background:transparent;border:1px solid var(--line-2);color:var(--paper);
   border-radius:999px;padding:.6rem 1rem;cursor:pointer;font:600 .85rem var(--f-body);transition:all .25s}
 .play-btn:hover{border-color:var(--brass-2);color:var(--brass-2)}
+/* Album: a big, unmistakable play button */
+.play-album{background:var(--brass);border-color:var(--brass);color:var(--ink);padding:.55rem 1.4rem .55rem .55rem;gap:.9rem;box-shadow:0 8px 24px -10px rgba(201,141,75,.7)}
+.play-album:hover{background:var(--brass-2);border-color:var(--brass-2);color:var(--ink);transform:translateY(-2px)}
+.play-album .pa-icon{flex:none;width:46px;height:46px;border-radius:50%;background:var(--ink);color:var(--brass-2);display:grid;place-items:center;padding-left:3px;transition:transform .25s}
+.play-album:hover .pa-icon{transform:scale(1.08)}
+.play-album .pa-text{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;text-align:left}
+.play-album .pa-text strong{font:700 1.05rem var(--f-body);letter-spacing:.01em}
+.play-album .pa-text small{font:500 .7rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+@media (prefers-reduced-motion:reduce){.play-album:hover,.play-album:hover .pa-icon{transform:none}}
 .play-btn .eq{display:flex;gap:2px;align-items:flex-end;height:14px}
 .play-btn .eq i{width:3px;background:currentColor;height:40%;border-radius:1px}
 .play-btn:hover .eq i{animation:eq 1s ease-in-out infinite}
