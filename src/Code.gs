@@ -48,6 +48,8 @@ var SCHEMA = {
   SERVICES:     ['order', 'service', 'description', 'visible', 'status'],
   SOCIAL_LINKS: ['order', 'platform', 'url', 'label', 'visible', 'status'],
   PRICING:      ['order', 'service', 'item', 'prefix', 'price_ugx', 'price_usd', 'unit', 'details', 'highlight', 'visible', 'status'],
+  // Beat catalogue: public fields are explicitly allowlisted below.
+  BEATS:         ['id', 'title', 'slug', 'genre', 'bpm', 'musical_key', 'mood', 'description', 'preview_url', 'mp3_file_ref', 'wav_file_ref', 'nonexclusive_price_ugx', 'nonexclusive_price_usd', 'exclusive_price_ugx', 'exclusive_price_usd', 'nonexclusive_terms', 'exclusive_terms', 'status', 'visible', 'featured', 'order', 'tags', 'notes'],
   SPONSORS:     ['order', 'name', 'slot', 'tagline', 'logo', 'link', 'start', 'end', 'visible', 'status'],
   UPRS_WORKS:   ['order', 'title', 'album', 'year', 'duration', 'writers_composers', 'splits', 'performers', 'isrc', 'uprs_status', 'notes'],
   ENQUIRIES:    ['timestamp', 'name', 'email', 'enquiry_type', 'message'],
@@ -125,6 +127,28 @@ function getPortfolio_(preview) {
       .filter(function (r) { return preview || String(r.status).toLowerCase() !== 'placeholder'; })
       .map(function (r) { return preview ? r : stripPlaceholders_(r); })
       .sort(function (a, b) { return (Number(a.order) || 999) - (Number(b.order) || 999); });
+    // BEATS is read from the CMS but only approved storefront fields are public.
+    // Never expose private master references, internal notes, or draft licence terms.
+    if (name === 'BEATS') {
+      out.BEATS = out.BEATS
+        .filter(function (b) {
+          var st = String(b.status || '').toLowerCase().trim();
+          return st !== 'sold exclusively' && st !== 'reserved' && st !== 'sold';
+        })
+        .map(function (b) {
+          return {
+            id: b.id, title: b.title, slug: b.slug, genre: b.genre,
+            bpm: b.bpm, musical_key: b.musical_key, mood: b.mood,
+            description: b.description, preview_url: b.preview_url,
+            nonexclusive_price_ugx: b.nonexclusive_price_ugx,
+            nonexclusive_price_usd: b.nonexclusive_price_usd,
+            exclusive_price_ugx: b.exclusive_price_ugx,
+            exclusive_price_usd: b.exclusive_price_usd,
+            status: b.status, visible: b.visible, featured: b.featured,
+            order: b.order, tags: b.tags
+          };
+        });
+    }
   });
   // Sponsors switch themselves on and off by their start / end dates
   var now = new Date();
