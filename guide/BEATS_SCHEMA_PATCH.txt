@@ -1,0 +1,21 @@
+Insert the following entry into the SCHEMA object in src/Code.gs
+(after PRICING or SPONSORS is fine). Do NOT add BEATS to PRIVATE_SHEETS.
+
+  // --- feature/beat-store-prototype: BEATS catalogue (public) ---
+  BEATS: [
+    'id', 'title', 'slug', 'genre', 'bpm', 'musical_key', 'mood', 'description',
+    'preview_url', 'mp3_file_ref', 'wav_file_ref',
+    'nonexclusive_price_ugx', 'nonexclusive_price_usd',
+    'exclusive_price_ugx', 'exclusive_price_usd',
+    'nonexclusive_terms', 'exclusive_terms',
+    'status', 'visible', 'featured', 'order', 'tags', 'notes'
+  ],
+
+Optional filter in getPortfolio_ after the generic filter:
+  // Hide sold/reserved beats from public catalogue
+  if (name === 'BEATS') {
+    out.BEATS = out.BEATS.filter(function (b) {
+      var st = String(b.status || '').toLowerCase();
+      return st !== 'sold exclusively' && st !== 'reserved' && st !== 'sold';
+    });
+  }
