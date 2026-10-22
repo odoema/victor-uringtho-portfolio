@@ -34,6 +34,14 @@
    - Exclusive completion must set status so the beat is no longer offered.
    - Existing non-exclusive rights are not automatically erased; they must be addressed in the exclusive agreement.
 
+## Follow-up implementation completed on the feature branch
+
+- Added the `BEATS` schema to `src/Code.gs` on `feature/beat-store-prototype`.
+- Added an explicit public-field allowlist: public JSON includes storefront metadata and prices, but excludes `mp3_file_ref`, `wav_file_ref`, internal `notes`, and draft licence-term fields.
+- Public JSON filters beats whose status is `sold`, `sold exclusively`, or `reserved`.
+- This code change is not deployed and does not affect the live site or production Apps Script deployment.
+- Before testing the JSON feed, create a separate Apps Script project/deployment bound to the development spreadsheet (or a full development CMS copy). Verify its Script Property `SHEET_ID` points only to the development spreadsheet. Do not reuse or redeploy the production web app.
+
 ## What was deliberately NOT done
 
 - No push to main / no change to live GitHub Pages.
